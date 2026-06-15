@@ -52,14 +52,45 @@ a2-schema makes all of this possible through a unified structured data standard.
 
 ---
 
+## Architecture (SSoT)
+
+a2-schema follows a **Single Source of Truth** architecture — every def is defined
+exactly once, in the Grand Vault. Everything else references it.
+
+```
+Grand Vault (SSoT)        all def definitions (§1–§9)
+   ↓ $ref only
+Profiles                  Signature, Contract, … (pure $ref aggregators)
+   ↓ aggregate
+Tier Configs              a2-sign, a2-doc, … (per-App def selection)
+   ↓ filter
+Applications              a2-Sign App, a2-Doc App, …
+```
+
+Dependency is strictly one-way (Profiles/Tiers → Grand Vault); the Vault references
+nothing outside itself. New document types are added by extending a Vault section and
+adding a profile — never by duplicating defs.
+
 ## Schemas
 
-| Schema | Version | Purpose |
-|---|---|---|
-| [Grand Vault](schemas/a2-grand-vault-v00.00.03.json) | v0.0.3 | Foundation: Identity, AI Audit, Trust |
-| [Contract Module](schemas/a2-contract-module-v00.01.00.json) | v0.1.0 | Legal contracts with full audit |
+| Type | Schema | Version | Role |
+|---|---|---|---|
+| **SSoT** | [Grand Vault](schemas/a2-grand-vault-v00.00.08.json) | v0.0.8 | All def definitions (§1–§9): Common, HashChain, AI Audit, Signature, Biometric, SigningCeremony, Document, Contract |
+| Profile | [Signature](schemas/profiles/a2-signature-profile-v00.00.01.json) | v0.0.1 | Signature use cases (ML-DSA, RSA, JAdES, Handwritten ISO 19794-7) |
+| Profile | [Contract](schemas/profiles/a2-contract-profile-v00.01.07.json) | v0.1.7 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) |
 
-More modules coming: Healthcare, Robotics, KnowledgeOS
+## Tier Configurations (App Profiles)
+
+| Tier | Version | Use Case |
+|---|---|---|
+| [a2-sign](schemas/tier-configs/a2-sign-v00.00.01.json) | v0.0.1 | Electronic signature application |
+| [a2-doc](schemas/tier-configs/a2-doc-v00.00.03.json) | v0.0.3 | General document processing |
+
+### Scalability
+
+The design supports **2500+ document types** through Vault section expansion (§1–§50+),
+profile-based composition (no duplication), and tier-config filtering (App-specific).
+More modules coming: Healthcare, Robotics, Life, KnowledgeOS.
 
 ---
 
@@ -116,8 +147,10 @@ More modules coming: Healthcare, Robotics, KnowledgeOS
 
 ## Roadmap
 
-- [x] Grand Vault Schema v0.0.3
-- [x] Contract Module v0.1.0
+- [x] Grand Vault SSoT v0.0.8 (§1–§9, 125 defs)
+- [x] Signature Profile v0.0.1 (incl. Handwritten ISO 19794-7)
+- [x] Contract Profile v0.1.7
+- [x] Tier Configs: a2-sign, a2-doc
 - [ ] Healthcare Module
 - [ ] AI Agent Module
 - [ ] SDK (TypeScript, Rust, Python)

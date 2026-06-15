@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2-schema.org/profiles/signature/v0.0.1/schema.json",
+  "title": "Signature Profile v0.0.1",
+  "version": "0.0.1",
+  "description": "Profile selecting signature-related defs from Grand Vault. NO own def bodies — pure $ref aggregator.",
+  "license": "Apache-2.0",
+  "x-a2-role": "profile",
+  "x-a2-base-schema": "https://a2-schema.org/vault/v0.0.8/schema.json",
+  "$defs": {
+    "SignatureNode": {
+      "oneOf": [
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.8/schema.json#/$defs/BlockSignature"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.8/schema.json#/$defs/HandwrittenSignature"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.8/schema.json#/$defs/BiometricCapture"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.8/schema.json#/$defs/SignatureBundle"
+        }
+      ]
+    }
+  },
+  "x-a2-included-defs": [
+    "MLDSAAlgorithmEnum",
+    "SignatureAlgorithmType",
+    "LegacySignatureAlgEnum",
+    "JAdESProfileEnum",
+    "JAdESEtsiUEntry",
+    "JAdESSigTst",
+    "JAdESTstVD",
+    "JAdESRVals",
+    "JAdESXVals",
+    "JCSCanonicalizationEnum",
+    "JWSProtectedHeaderDecoded",
+    "BlockSignature",
+    "SignatureBundle",
+    "HandwrittenSignature",
+    "BiometricCapture",
+    "BiometricTypeEnum"
+  ]
+}

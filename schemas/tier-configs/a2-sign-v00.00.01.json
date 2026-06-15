@@ -1,0 +1,134 @@
+{
+  "$schema": "https://a2-schema.org/tier-config/v0.1.0",
+  "kind": "tier-config",
+  "tier": "a2-sign",
+  "version": "0.0.1",
+  "x-strip-mode": "selection",
+  "description": "Tier config for the a2-Sign electronic-signature app: GV (SSoT) + signature & contract profiles + handwritten signature.",
+  "imports": {
+    "main": "https://a2-schema.org/vault/v0.0.8/schema.json"
+  },
+  "profiles": [
+    "https://a2-schema.org/profiles/signature/v0.0.1/schema.json",
+    "https://a2-schema.org/profiles/contract/v0.1.7/schema.json"
+  ],
+  "baseSchemas": {
+    "main": {
+      "schemaHash": "sha256:b0afc752b3b7ea2e6144001dd0e62336d371bf08c0410b76beaff0bab801bcb2",
+      "lastSyncedAt": "2026-06-15T00:00:00Z"
+    }
+  },
+  "defs": {
+    "A2Envelope": {
+      "selected": true
+    },
+    "Root": {
+      "selected": true
+    },
+    "Header": {
+      "selected": true
+    },
+    "NodeIdType": {
+      "selected": true
+    },
+    "SemanticType": {
+      "selected": true
+    },
+    "SemanticBlock": {
+      "selected": true
+    },
+    "Value": {
+      "selected": true
+    },
+    "ExternalPayload": {
+      "selected": true
+    },
+    "HashChain": {
+      "selected": true
+    },
+    "BlockHashChain": {
+      "selected": true
+    },
+    "AIAction": {
+      "selected": true
+    },
+    "Instruction": {
+      "selected": true
+    },
+    "AuditSession": {
+      "selected": true
+    },
+    "MLDSAAlgorithmEnum": {
+      "selected": true
+    },
+    "SignatureAlgorithmType": {
+      "selected": true
+    },
+    "BlockSignature": {
+      "selected": true
+    },
+    "SignatureBundle": {
+      "selected": true
+    },
+    "JAdESProfileEnum": {
+      "selected": true
+    },
+    "JCSCanonicalizationEnum": {
+      "selected": true
+    },
+    "JWSProtectedHeaderDecoded": {
+      "selected": true
+    },
+    "HandwrittenSignature": {
+      "selected": true
+    },
+    "BiometricCapture": {
+      "selected": true
+    },
+    "BiometricTypeEnum": {
+      "selected": true
+    },
+    "SigningCeremony": {
+      "selected": true
+    },
+    "CeremonyParticipant": {
+      "selected": true
+    },
+    "CeremonyTypeEnum": {
+      "selected": true
+    },
+    "IALLevel": {
+      "selected": true
+    },
+    "AALLevel": {
+      "selected": true
+    },
+    "FALLevel": {
+      "selected": true
+    },
+    "ContractParty": {
+      "selected": true
+    },
+    "ContractClause": {
+      "selected": true
+    },
+    "ConsentToESign": {
+      "selected": true
+    },
+    "USESIGNCompliance": {
+      "selected": true
+    },
+    "SignatoryBlock": {
+      "selected": true
+    },
+    "RedlineAction": {
+      "selected": true
+    },
+    "ContractSigningCeremony": {
+      "selected": true
+    },
+    "HandwrittenContractSignature": {
+      "selected": true
+    }
+  }
+}
