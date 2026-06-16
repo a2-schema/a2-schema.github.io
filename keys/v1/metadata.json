@@ -1,0 +1,22 @@
+{
+  "jku": "https://a2-schema.org/keys/v1/jwks.json",
+  "issuer": "a2-Sign / Ichiri",
+  "keys": [
+    {
+      "kid": "ml-dsa-65-v1",
+      "alg": "ML-DSA-65",
+      "pem": "https://a2-schema.org/keys/ml-dsa-public.pem"
+    },
+    {
+      "kid": "es256-v1",
+      "alg": "ES256",
+      "pem": "https://a2-schema.org/keys/ecdsa-public.pem"
+    },
+    {
+      "kid": "rs256-v1",
+      "alg": "RS256",
+      "pem": "https://a2-schema.org/keys/rsa-public.pem"
+    }
+  ],
+  "note": "ML-DSA-65 uses the JOSE PQC draft 'AKP' key type (FIPS 204 raw public key)."
+}
