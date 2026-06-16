@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2-schema.org/profiles/compliance/v0.0.1/schema.json",
+  "title": "Compliance Profile v0.0.1",
+  "version": "0.0.1",
+  "description": "Profile selecting compliance-related defs from Grand Vault v0.0.9. References §10 Compliance + §3 AI Audit. NO own def bodies — pure $ref aggregator.",
+  "license": "Apache-2.0",
+  "x-a2-role": "profile",
+  "x-a2-base-schema": "https://a2-schema.org/vault/v0.0.9/schema.json",
+  "$defs": {
+    "ComplianceEvent": {
+      "oneOf": [
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/ComplianceLog"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/AccessControlEvent"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/ConsentReceipt"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/DataSubjectRequest"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/IncidentReport"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/PIIDetection"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/GovernanceAttestation"
+        },
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/AIAction"
+        }
+      ]
+    }
+  },
+  "x-a2-included-defs": [
+    "ComplianceLog",
+    "ComplianceFrameworkEnum",
+    "ConsentReceipt",
+    "DataLineage",
+    "DataSubjectRequest",
+    "IncidentReport",
+    "AccessControlEvent",
+    "PIIDetection",
+    "GovernanceAttestation",
+    "AIAction",
+    "Instruction",
+    "AuditSession"
+  ]
+}

@@ -1,0 +1,5177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2-schema.org/vault/v0.0.8/schema.json",
+  "title": "Grand Vault v0.0.8 — Single Source of Truth",
+  "version": "0.0.8",
+  "description": "The complete, authoritative def repository for a2-schema. All other schemas $ref defs here. Sections §1–§9; scalable to 2500+ DocTypes.",
+  "license": "Apache-2.0",
+  "x-a2-role": "ssot",
+  "x-a2-deprecation-policy": "Defs marked x-a2-deprecated remain available for 2 minor versions before removal.",
+  "$defs": {
+    "_____SIMPLE_TYPES_____": {
+      "description": "─── §1 Simple Types ──────────────────"
+    },
+    "NodeIdType": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_.\\-]{0,255}$",
+      "description": "Document-unique node identifier. Canonical form: '<prefix>-<uuidv7>'. NCName-compatible, xs:ID semantics.",
+      "x-a2-level": "L1"
+    },
+    "SemanticType": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]*_[A-Z][A-Za-z0-9]*$",
+      "minLength": 3,
+      "maxLength": 128,
+      "description": "Two-token GraphDB predicate: <MainObject>_<SemanticCategory>. e.g. Person_Name.",
+      "x-a2-level": "L1"
+    },
+    "SemanticUnitType": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]*_[A-Z][A-Za-z0-9]*_[A-Z][A-Za-z0-9]*$",
+      "minLength": 5,
+      "maxLength": 160,
+      "description": "Three-token quantity predicate: <MainObject>_<SubAspect>_<QuantityCategory>. e.g. Body_Mass_Kilogram.",
+      "x-a2-level": "L1"
+    },
+    "StatEnum": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "max",
+        "min",
+        "ave",
+        "median",
+        "stdev",
+        "percentile"
+      ]
+    },
+    "tsFormatTypeEnum": {
+      "type": "string",
+      "enum": [
+        "iso_s",
+        "iso_ms",
+        "iso_us",
+        "iso_ns"
+      ]
+    },
+    "SemanticBlockTypeEnum": {
+      "type": "string",
+      "enum": [
+        "title",
+        "subtitle",
+        "description",
+        "background",
+        "procedure",
+        "result",
+        "discussion",
+        "conclusion",
+        "caution",
+        "note",
+        "summary",
+        "reference"
+      ]
+    },
+    "ActorRoleEnum": {
+      "type": "string",
+      "enum": [
+        "author",
+        "creator",
+        "approver",
+        "reviewer",
+        "issuer",
+        "operator",
+        "custodian",
+        "translator",
+        "notarizer",
+        "organization"
+      ]
+    },
+    "GroundingPolicyEnum": {
+      "type": "string",
+      "enum": [
+        "strict",
+        "permissive",
+        "generative-allowed",
+        "inference-only",
+        "embargo"
+      ],
+      "description": "AI inference control. 'strict'=cite only facts; 'embargo'=MUST NOT be used by AI."
+    },
+    "ConfidenceType": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "CurrencyType": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "QualityEnum": {
+      "type": "string",
+      "enum": [
+        "good",
+        "acceptable",
+        "poor",
+        "unknown",
+        "synthetic",
+        "mixed"
+      ]
+    },
+    "ComparatorEnum": {
+      "type": "string",
+      "enum": [
+        "lt",
+        "le",
+        "eq",
+        "ge",
+        "gt",
+        "approx"
+      ]
+    },
+    "PrecisionType": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 50
+    },
+    "DecimalsType": {
+      "type": "integer",
+      "minimum": -30,
+      "maximum": 30
+    },
+    "ScaleType": {
+      "type": "integer",
+      "minimum": -100,
+      "maximum": 100
+    },
+    "UncertaintyType": {
+      "type": "number",
+      "minimum": 0
+    },
+    "UnitSystemEnum": {
+      "type": "string",
+      "enum": [
+        "SI",
+        "UCUM",
+        "Imperial",
+        "US",
+        "NIST",
+        "ISO80000"
+      ]
+    },
+    "DirEnum": {
+      "type": "string",
+      "enum": [
+        "ltr",
+        "rtl",
+        "auto"
+      ]
+    },
+    "NullFlavorEnum": {
+      "type": "string",
+      "enum": [
+        "NI",
+        "INV",
+        "OTH",
+        "NINF",
+        "PINF",
+        "UNC",
+        "DER",
+        "UNK",
+        "ASKU",
+        "NAV",
+        "NASK",
+        "QS",
+        "TRC",
+        "MSK",
+        "NA",
+        "NP"
+      ]
+    },
+    "ClassificationEnum": {
+      "type": "string",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted",
+        "secret"
+      ]
+    },
+    "CodeStringType": {
+      "type": "string",
+      "pattern": "^[!-=?-~]{1,128}$"
+    },
+    "MimeTypeType": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9!#$&.+\\-^_]{1,127}/[A-Za-z0-9!#$&.+\\-^_]{1,127}$"
+    },
+    "EncodingEnum": {
+      "type": "string",
+      "enum": [
+        "utf-8",
+        "base64",
+        "base64url",
+        "hex",
+        "gzip+base64",
+        "deflate+base64",
+        "br+base64",
+        "zstd+base64"
+      ]
+    },
+    "MaskTokenType": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$"
+    },
+    "MaskListType": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MaskTokenType"
+      }
+    },
+    "RelTokenType": {
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9_]{0,63}$"
+    },
+    "SubClassType": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]*(_[A-Z][A-Za-z0-9]*)*$",
+      "maxLength": 64
+    },
+    "MetaClassType": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*(_[A-Z][A-Z0-9]*)*$",
+      "maxLength": 64
+    },
+    "OrderType": {
+      "type": "number",
+      "minimum": 0
+    },
+    "WeightType": {
+      "type": "number"
+    },
+    "_____REFERENCE_TYPES_____": {
+      "description": "─── §2 Reference Types ───────────────"
+    },
+    "BaseRef": {
+      "type": "object",
+      "properties": {
+        "$value": {
+          "type": "string"
+        },
+        "src": {
+          "type": "string",
+          "format": "uri"
+        },
+        "ruleID": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "sLogicRef": {
+      "properties": {
+        "src": {
+          "type": "string",
+          "format": "uri",
+          "default": "https://a2-schema.org/3.0/s_logic/logic_templates.json"
+        },
+        "ruleID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ruleID"
+      ],
+      "$ref": "#/$defs/BaseRef"
+    },
+    "SemanticRef": {
+      "$ref": "#/$defs/BaseRef"
+    },
+    "ContextRef": {
+      "$ref": "#/$defs/BaseRef"
+    },
+    "SourceRef": {
+      "$ref": "#/$defs/BaseRef"
+    },
+    "_____ACTOR_TYPES_____": {
+      "description": "─── §3 Actor Types ───────────────────"
+    },
+    "ActorObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Actor URI/URN or '#<NodeId>'."
+        },
+        "role": {
+          "$ref": "#/$defs/ActorRoleEnum"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "signatureRef": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_.\\-]{0,255}$",
+          "description": "G15. IDREF → Signature@id."
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string"
+        }
+      }
+    },
+    "Actor": {
+      "properties": {
+        "$tag": {
+          "const": "Actor"
+        }
+      },
+      "required": [
+        "$tag"
+      ],
+      "unevaluatedProperties": false,
+      "$ref": "#/$defs/ActorObject"
+    },
+    "Author": {
+      "properties": {
+        "$tag": {
+          "const": "Author"
+        }
+      },
+      "required": [
+        "$tag"
+      ],
+      "unevaluatedProperties": false,
+      "$ref": "#/$defs/ActorObject"
+    },
+    "ApprovedBy": {
+      "properties": {
+        "$tag": {
+          "const": "ApprovedBy"
+        }
+      },
+      "required": [
+        "$tag"
+      ],
+      "unevaluatedProperties": false,
+      "$comment": "G15: signatureRef must resolve to a Signature in the document.",
+      "$ref": "#/$defs/ActorObject"
+    },
+    "IssuedBy": {
+      "properties": {
+        "$tag": {
+          "const": "IssuedBy"
+        }
+      },
+      "required": [
+        "$tag"
+      ],
+      "unevaluatedProperties": false,
+      "$ref": "#/$defs/ActorObject"
+    },
+    "AnyActorNode": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Actor"
+        },
+        {
+          "$ref": "#/$defs/Author"
+        },
+        {
+          "$ref": "#/$defs/ApprovedBy"
+        },
+        {
+          "$ref": "#/$defs/IssuedBy"
+        }
+      ]
+    },
+    "_____LEAF_TYPES_____": {
+      "description": "─── §5 Leaf / Data Types — updated with $signature and $hashChain ────────"
+    },
+    "Value": {
+      "type": "object",
+      "description": "G17 Branch B L6 concrete. Core leaf element. v0.0.2: adds optional $signature (B-B) and $hashChain for individual high-value data points.",
+      "properties": {
+        "$tag": {
+          "type": "string"
+        },
+        "$value": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string",
+          "x-a2-level": "L1"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "type": {
+          "type": "string",
+          "x-a2-level": "L1"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "semantic": {
+          "$ref": "#/$defs/SemanticType"
+        },
+        "semanticUnit": {
+          "$ref": "#/$defs/SemanticUnitType"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "freshnessTTL": {
+          "type": "string"
+        },
+        "supersededBy": {
+          "type": "string"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "quality": {
+          "$ref": "#/$defs/QualityEnum"
+        },
+        "currency": {
+          "$ref": "#/$defs/CurrencyType"
+        },
+        "display": {
+          "type": "string"
+        },
+        "voiceAlias": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "slot": {
+          "type": "string"
+        },
+        "stat": {
+          "$ref": "#/$defs/StatEnum"
+        },
+        "lowerLimit": {
+          "type": "number"
+        },
+        "upperLimit": {
+          "type": "number"
+        },
+        "required": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "dbType": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "dir": {
+          "$ref": "#/$defs/DirEnum"
+        },
+        "nil": {
+          "type": "boolean"
+        },
+        "nullFlavor": {
+          "$ref": "#/$defs/NullFlavorEnum"
+        },
+        "comparator": {
+          "$ref": "#/$defs/ComparatorEnum"
+        },
+        "precision": {
+          "$ref": "#/$defs/PrecisionType"
+        },
+        "decimals": {
+          "$ref": "#/$defs/DecimalsType"
+        },
+        "scale": {
+          "$ref": "#/$defs/ScaleType"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/UncertaintyType"
+        },
+        "unitSystem": {
+          "$ref": "#/$defs/UnitSystemEnum"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "derivedFrom": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "attributedTo": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "pii": {
+          "type": "boolean"
+        },
+        "code": {
+          "$ref": "#/$defs/CodeStringType"
+        },
+        "codeSystem": {
+          "type": "string",
+          "format": "uri"
+        },
+        "codeSystemVersion": {
+          "type": "string"
+        },
+        "mimeType": {
+          "$ref": "#/$defs/MimeTypeType"
+        },
+        "encoding": {
+          "$ref": "#/$defs/EncodingEnum"
+        },
+        "format": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rule": {
+          "type": "string"
+        },
+        "$signature": {
+          "$ref": "#/$defs/BlockSignature",
+          "description": "G19. Optional per-Value ML-DSA/JWS signature. Recommended profile: B-B. Use for high-value scalar data points (financial figures, medical measurements, legal identifiers). Payload = RFC8785(Value object excluding [$signature, $hashChain]).",
+          "x-a2-spec": "G19",
+          "x-jades-profile-recommended": "B-B"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/BlockHashChain",
+          "description": "G20. Optional per-Value hash chain anchor. Use for audit-critical Values (e.g. measurement readings in a sequence). seqNo tracks Value ordering within the document chain.",
+          "x-a2-spec": "G20"
+        },
+        "groundingNote": {
+          "type": "string",
+          "description": "a2: AI推論補足・制約・文脈。"
+        }
+      },
+      "required": [
+        "$tag"
+      ],
+      "dependentRequired": {
+        "code": [
+          "codeSystem"
+        ],
+        "codeSystemVersion": [
+          "codeSystem"
+        ],
+        "nullFlavor": [
+          "nil"
+        ]
+      },
+      "dependentSchemas": {
+        "nil": {
+          "if": {
+            "properties": {
+              "nil": {
+                "const": true
+              }
+            },
+            "required": [
+              "nil"
+            ]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "maxLength": 0
+              }
+            }
+          }
+        },
+        "nullFlavor": {
+          "properties": {
+            "nil": {
+              "const": true
+            }
+          },
+          "required": [
+            "nil"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "ASSERT: observedAt <= recordedAt.",
+          "x-assert": "observedAt <= recordedAt"
+        },
+        {
+          "$comment": "ASSERT: validFrom <= validTo.",
+          "x-assert": "validFrom <= validTo"
+        },
+        {
+          "$comment": "ASSERT: lowerLimit <= upperLimit.",
+          "x-assert": "lowerLimit <= upperLimit"
+        },
+        {
+          "$comment": "G16 x-externalValidate: code in codeSystem.",
+          "x-externalValidate": {
+            "trigger": "code",
+            "fn": "a2-schemafunc:external-validate",
+            "args": [
+              "code",
+              "codeSystem"
+            ]
+          }
+        }
+      ],
+      "x-a2-branch": "B",
+      "x-a2-level": "L6"
+    },
+    "ValueDesc": {
+      "type": "object",
+      "properties": {
+        "$tag": {
+          "const": "ValueDesc"
+        },
+        "value": {
+          "$ref": "#/$defs/Value"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "$tag",
+        "value"
+      ],
+      "unevaluatedProperties": false,
+      "x-a2-branch": "B",
+      "x-a2-level": "L4"
+    },
+    "Ref": {
+      "type": "object",
+      "description": "G17 Branch C L5 concrete. Typed cross-reference edge. v0.0.2: adds optional $signature (B-B) for signed relationship assertions.",
+      "properties": {
+        "$tag": {
+          "const": "Ref"
+        },
+        "$value": {
+          "type": "string"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "display": {
+          "type": "string"
+        },
+        "rel": {
+          "$ref": "#/$defs/RelTokenType"
+        },
+        "subClass": {
+          "$ref": "#/$defs/SubClassType"
+        },
+        "metaClass": {
+          "$ref": "#/$defs/MetaClassType"
+        },
+        "disOrder": {
+          "$ref": "#/$defs/OrderType"
+        },
+        "calOrder": {
+          "$ref": "#/$defs/OrderType"
+        },
+        "procOrder": {
+          "$ref": "#/$defs/OrderType"
+        },
+        "weight": {
+          "$ref": "#/$defs/WeightType"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "freshnessTTL": {
+          "type": "string"
+        },
+        "supersededBy": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "derivedFrom": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "attributedTo": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "quality": {
+          "$ref": "#/$defs/QualityEnum"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "pii": {
+          "type": "boolean"
+        },
+        "$signature": {
+          "$ref": "#/$defs/BlockSignature",
+          "description": "G19. Optional per-Ref ML-DSA/JWS signature. Recommended profile: B-B. Signs the relationship assertion (rel, from, to). Useful for signed knowledge graph edges.",
+          "x-a2-spec": "G19",
+          "x-jades-profile-recommended": "B-B"
+        }
+      },
+      "required": [
+        "$tag",
+        "rel"
+      ],
+      "allOf": [
+        {
+          "$comment": "ASSERT: observedAt <= recordedAt.",
+          "x-assert": "observedAt <= recordedAt"
+        },
+        {
+          "$comment": "ASSERT: validFrom <= validTo.",
+          "x-assert": "validFrom <= validTo"
+        },
+        {
+          "$comment": "G16 x-externalValidate: subClass validates rel token.",
+          "x-externalValidate": {
+            "trigger": "subClass",
+            "fn": "a2-schemafunc:external-validate",
+            "args": [
+              "rel",
+              "subClass"
+            ]
+          }
+        }
+      ],
+      "x-a2-branch": "C",
+      "x-a2-level": "L5"
+    },
+    "_____COMPOSITE_TYPES_____": {
+      "description": "─── §6 Composite / Container Types — updated with $signature and $hashChain ─"
+    },
+    "ValueBlock": {
+      "type": "object",
+      "description": "G17 Branch A-ext L4 concrete. Named value group. v0.0.2: adds $signature (B-T recommended) and $hashChain for group-level integrity.",
+      "properties": {
+        "$tag": {
+          "const": "ValueBlock"
+        },
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "type": {
+          "type": "string"
+        },
+        "subtype": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "freshnessTTL": {
+          "type": "string"
+        },
+        "supersededBy": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "derivedFrom": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "attributedTo": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "pii": {
+          "type": "boolean"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "quality": {
+          "$ref": "#/$defs/QualityEnum"
+        },
+        "code": {
+          "$ref": "#/$defs/CodeStringType"
+        },
+        "codeSystem": {
+          "type": "string",
+          "format": "uri"
+        },
+        "codeSystemVersion": {
+          "type": "string"
+        },
+        "rule": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Value"
+              },
+              {
+                "$ref": "#/$defs/ValueDesc"
+              },
+              {
+                "$ref": "#/$defs/ValueBlock"
+              },
+              {
+                "$ref": "#/$defs/ExternalPayload"
+              }
+            ]
+          }
+        },
+        "$signature": {
+          "$ref": "#/$defs/BlockSignature",
+          "description": "G19. Optional per-ValueBlock ML-DSA/JWS signature. Recommended profile: B-T (with timestamp). Payload covers: name, id, type, all children — enabling detection of child insertions/deletions. Signing all children hash means child order matters.",
+          "x-a2-spec": "G19",
+          "x-jades-profile-recommended": "B-T"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/BlockHashChain",
+          "description": "G20. Optional per-ValueBlock hash chain anchor. Links this named value group into the document chain for reordering/deletion detection.",
+          "x-a2-spec": "G20"
+        }
+      },
+      "required": [
+        "$tag",
+        "name"
+      ],
+      "dependentRequired": {
+        "code": [
+          "codeSystem"
+        ],
+        "codeSystemVersion": [
+          "codeSystem"
+        ],
+        "subtype": [
+          "type"
+        ]
+      },
+      "allOf": [
+        {
+          "$comment": "ASSERT: observedAt <= recordedAt.",
+          "x-assert": "observedAt <= recordedAt"
+        },
+        {
+          "$comment": "ASSERT: validFrom <= validTo.",
+          "x-assert": "validFrom <= validTo"
+        },
+        {
+          "$comment": "G16 x-externalValidate.",
+          "x-externalValidate": {
+            "trigger": "code",
+            "fn": "a2-schemafunc:external-validate",
+            "args": [
+              "code",
+              "codeSystem"
+            ]
+          }
+        }
+      ],
+      "x-a2-branch": "A-ext",
+      "x-a2-level": "L4"
+    },
+    "SemanticBlock": {
+      "type": "object",
+      "description": "G17 Branch A-ext L5 concrete. Mixed prose/structured block. v0.0.2: adds $signature (B-T recommended) for signed narrative sections.",
+      "properties": {
+        "$tag": {
+          "type": "string"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/SemanticBlockTypeEnum"
+        },
+        "subtype": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "derivedFrom": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "attributedTo": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "pii": {
+          "type": "boolean"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "quality": {
+          "$ref": "#/$defs/QualityEnum"
+        },
+        "rule": {
+          "type": "string"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$tag": {
+                    "const": "HTML"
+                  },
+                  "$value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "$tag"
+                ]
+              },
+              {
+                "$ref": "#/$defs/Value"
+              }
+            ]
+          },
+          "contains": {
+            "type": "object",
+            "properties": {
+              "$tag": {
+                "const": "HTML"
+              }
+            },
+            "required": [
+              "$tag"
+            ]
+          },
+          "minContains": 1
+        },
+        "$signature": {
+          "$ref": "#/$defs/BlockSignature",
+          "description": "G19. Optional per-SemanticBlock ML-DSA/JWS signature. Recommended profile: B-T. Signs the prose narrative and embedded Values — critical for legal/medical reports.",
+          "x-a2-spec": "G19",
+          "x-jades-profile-recommended": "B-T"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/BlockHashChain",
+          "description": "G20. Optional per-SemanticBlock hash chain anchor.",
+          "x-a2-spec": "G20"
+        }
+      },
+      "required": [
+        "$tag",
+        "type",
+        "content"
+      ],
+      "dependentRequired": {
+        "subtype": [
+          "type"
+        ]
+      },
+      "x-a2-branch": "A-ext",
+      "x-a2-level": "L5",
+      "$comment": "ASSERT: validFrom <= validTo.",
+      "x-assert": "validFrom <= validTo"
+    },
+    "Log": {
+      "type": "object",
+      "description": "G17 Branch E L6 concrete. Audit log entry. v0.0.2: adds $signature (B-LT recommended — audit records require long-term validation) and $hashChain (critical — audit chain integrity).",
+      "properties": {
+        "$tag": {
+          "const": "Log"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "type": {
+          "type": "string"
+        },
+        "subtype": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "freshnessTTL": {
+          "type": "string"
+        },
+        "supersededBy": {
+          "type": "string"
+        },
+        "tsFormat": {
+          "$ref": "#/$defs/tsFormatTypeEnum"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "derivedFrom": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "attributedTo": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "pii": {
+          "type": "boolean"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "quality": {
+          "$ref": "#/$defs/QualityEnum"
+        },
+        "code": {
+          "$ref": "#/$defs/CodeStringType"
+        },
+        "codeSystem": {
+          "type": "string",
+          "format": "uri"
+        },
+        "codeSystemVersion": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnyLogChild"
+          }
+        },
+        "$signature": {
+          "$ref": "#/$defs/BlockSignature",
+          "description": "G19. Optional per-Log ML-DSA/JWS signature. Recommended profile: B-LT (audit records require long-term validation including embedded certificate and revocation data). Ensures audit log immutability even after TSA/CA decommissioning.",
+          "x-a2-spec": "G19",
+          "x-jades-profile-recommended": "B-LT"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/BlockHashChain",
+          "description": "G20. Per-Log hash chain anchor. STRONGLY RECOMMENDED for Log entries. Enables audit trail continuity verification — a missing or reordered seqNo indicates tampered audit history.",
+          "x-a2-spec": "G20",
+          "x-audit-critical": true
+        },
+        "rule": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "$tag",
+        "timestamp"
+      ],
+      "dependentRequired": {
+        "code": [
+          "codeSystem"
+        ],
+        "codeSystemVersion": [
+          "codeSystem"
+        ],
+        "subtype": [
+          "type"
+        ]
+      },
+      "allOf": [
+        {
+          "$comment": "ASSERT: observedAt <= recordedAt.",
+          "x-assert": "observedAt <= recordedAt"
+        },
+        {
+          "$comment": "ASSERT: validFrom <= validTo.",
+          "x-assert": "validFrom <= validTo"
+        },
+        {
+          "$comment": "G16 x-externalValidate.",
+          "x-externalValidate": {
+            "trigger": "code",
+            "fn": "a2-schemafunc:external-validate",
+            "args": [
+              "code",
+              "codeSystem"
+            ]
+          }
+        },
+        {
+          "$comment": "ASSERT (RootLog): when Log appears directly under root.nodes, children limited to <=1 Value, <=1 Ref, 0 ValueBlock.",
+          "x-assert": "if parent == 'root' then (count(children[Value]) <= 1 AND count(children[Ref]) <= 1 AND count(children[ValueBlock]) == 0)"
+        }
+      ],
+      "x-a2-branch": "E",
+      "x-a2-level": "L6"
+    },
+    "AnyLogChild": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Value"
+        },
+        {
+          "$ref": "#/$defs/ValueDesc"
+        },
+        {
+          "$ref": "#/$defs/ValueBlock"
+        },
+        {
+          "$ref": "#/$defs/SemanticBlock"
+        },
+        {
+          "$ref": "#/$defs/Ref"
+        },
+        {
+          "$ref": "#/$defs/Signature"
+        },
+        {
+          "$ref": "#/$defs/Log"
+        },
+        {
+          "$ref": "#/$defs/ExternalPayload"
+        }
+      ]
+    },
+    "Entity": {
+      "type": "object",
+      "description": "G17 Branch A L16 concrete. The primary semantic node. v0.0.2: adds $signature (B-LT recommended) and $hashChain (RECOMMENDED — core knowledge node integrity). The $signature.payload covers the entire Entity including all children (excluding $signature/$hashChain).",
+      "properties": {
+        "$tag": {
+          "type": "string"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "alias": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tsFormat": {
+          "$ref": "#/$defs/tsFormatTypeEnum"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "freshnessTTL": {
+          "type": "string"
+        },
+        "supersededBy": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "derivedFrom": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "attributedTo": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "type": {
+          "type": "string"
+        },
+        "subtype": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lang": {
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "pii": {
+          "type": "boolean"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "quality": {
+          "$ref": "#/$defs/QualityEnum"
+        },
+        "code": {
+          "$ref": "#/$defs/CodeStringType"
+        },
+        "codeSystem": {
+          "type": "string",
+          "format": "uri"
+        },
+        "codeSystemVersion": {
+          "type": "string"
+        },
+        "industry": {
+          "$ref": "#/$defs/MaskListType"
+        },
+        "usecase": {
+          "$ref": "#/$defs/MaskListType"
+        },
+        "protechfun": {
+          "$ref": "#/$defs/MaskListType"
+        },
+        "rule": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnyEntityChild"
+          }
+        },
+        "$signature": {
+          "$ref": "#/$defs/BlockSignature",
+          "description": "G19. Optional per-Entity ML-DSA/JWS signature. Recommended profile: B-LT. The payload is the RFC8785-canonical JSON of the entire Entity (all properties and all children) excluding [$signature, $hashChain]. This provides strong tamper-evidence for the complete entity subtree. ML-DSA-65 recommended. For legal/medical entities use ML-DSA-87 with B-LTA.",
+          "x-a2-spec": "G19",
+          "x-jades-profile-recommended": "B-LT",
+          "x-ml-dsa-recommended": "ML-DSA-65"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/BlockHashChain",
+          "description": "G20. Per-Entity hash chain anchor. RECOMMENDED. Links this Entity into the document-level hash chain. blockHash = SHA256(prevHash || RFC8785(entity_without_$signature_$hashChain)). Enables detection of entity deletion or reordering without requiring signature verification.",
+          "x-a2-spec": "G20",
+          "x-audit-critical": true
+        },
+        "domain": {
+          "type": "string",
+          "enum": [
+            "care",
+            "home",
+            "factory",
+            "food",
+            "medical",
+            "transport",
+            "finance",
+            "general"
+          ],
+          "description": "a2: GraphDBパーティション識別子。AuditSessionのsessionTypeと対応させる。"
+        },
+        "groundingNote": {
+          "type": "string",
+          "description": "a2: AI推論時の補足注記。"
+        }
+      },
+      "required": [
+        "$tag",
+        "id"
+      ],
+      "dependentRequired": {
+        "code": [
+          "codeSystem"
+        ],
+        "codeSystemVersion": [
+          "codeSystem"
+        ],
+        "subtype": [
+          "type"
+        ]
+      },
+      "allOf": [
+        {
+          "$comment": "ASSERT: observedAt <= recordedAt.",
+          "x-assert": "observedAt <= recordedAt"
+        },
+        {
+          "$comment": "ASSERT: validFrom <= validTo.",
+          "x-assert": "validFrom <= validTo"
+        },
+        {
+          "$comment": "G16 x-externalValidate.",
+          "x-externalValidate": {
+            "trigger": "code",
+            "fn": "a2-schemafunc:external-validate",
+            "args": [
+              "code",
+              "codeSystem"
+            ]
+          }
+        },
+        {
+          "$comment": "x-sLogic: rule evaluation.",
+          "x-sLogic": {
+            "trigger": "rule",
+            "fn": "a2-schemafunc:eval-s-expr"
+          }
+        }
+      ],
+      "x-a2-branch": "A",
+      "x-a2-level": "L16"
+    },
+    "AnyEntityChild": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Value"
+        },
+        {
+          "$ref": "#/$defs/ValueDesc"
+        },
+        {
+          "$ref": "#/$defs/ValueBlock"
+        },
+        {
+          "$ref": "#/$defs/SemanticBlock"
+        },
+        {
+          "$ref": "#/$defs/Log"
+        },
+        {
+          "$ref": "#/$defs/Ref"
+        },
+        {
+          "$ref": "#/$defs/Signature"
+        },
+        {
+          "$ref": "#/$defs/Entity"
+        },
+        {
+          "$ref": "#/$defs/ExternalPayload"
+        }
+      ]
+    },
+    "_____CRYPTO_TYPES_____": {
+      "description": "─── §7 Crypto Types (v0.0.2 document-level, unchanged) ──────────────────"
+    },
+    "Signature": {
+      "type": "object",
+      "properties": {
+        "$tag": {
+          "const": "Signature"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType",
+          "description": "G15. Referenced by Actor/ApprovedBy @signatureRef."
+        },
+        "alg": {
+          "$ref": "#/$defs/SignatureAlgorithmType",
+          "description": "v0.0.2: now typed as SignatureAlgorithmType (ML-DSA or legacy JOSE)."
+        },
+        "signedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "signedBy": {
+          "type": "string",
+          "format": "uri"
+        },
+        "keyId": {
+          "type": "string"
+        },
+        "canonicalization": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "JWS compact serialization or base64-encoded binary."
+            },
+            {
+              "type": "object",
+              "description": "Structured signature envelope."
+            }
+          ]
+        }
+      },
+      "required": [
+        "$tag"
+      ],
+      "x-a2-branch": "F",
+      "x-a2-level": "L4",
+      "description": "G17 Branch F L4 concrete. Document-level signature element (v0.0.2 compatible). For per-block signatures use $signature (BlockSignature). v0.0.2: @alg typed as SignatureAlgorithmType."
+    },
+    "HashChain": {
+      "type": "object",
+      "properties": {
+        "$tag": {
+          "const": "HashChain"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "Namespace": {
+          "type": "string",
+          "format": "uri"
+        },
+        "DocumentID": {
+          "type": "string"
+        },
+        "Version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "LatestChainHash": {
+          "type": "string"
+        },
+        "XmlSignature": {
+          "type": "string"
+        },
+        "SignedBy": {
+          "type": "string"
+        },
+        "SignedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "Algorithm": {
+          "type": "string",
+          "default": "Ed25519+SHA256"
+        },
+        "ServiceEndpoint": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "$tag",
+        "Namespace",
+        "DocumentID",
+        "Version",
+        "LatestChainHash",
+        "SignedBy",
+        "SignedAt"
+      ],
+      "x-a2-branch": "F",
+      "x-a2-level": "L4",
+      "x-a2-spec": "G18",
+      "description": "G18. Document-level hash chain container (v0.0.2 compatible). For per-block chains use $hashChain (BlockHashChain)."
+    },
+    "ExternalPayload": {
+      "type": "object",
+      "properties": {
+        "$tag": {
+          "const": "$external"
+        },
+        "$value": {
+          "type": "string"
+        },
+        "mimeType": {
+          "$ref": "#/$defs/MimeTypeType"
+        },
+        "encoding": {
+          "$ref": "#/$defs/EncodingEnum"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "signed-payload",
+            "legal-mandate",
+            "binary-blob"
+          ]
+        }
+      },
+      "required": [
+        "$tag",
+        "reason"
+      ],
+      "description": "PERMITTED USE ONLY. (a) Sealed payloads, (b) legally mandated original-form XML, (c) binary blobs."
+    },
+    "SignatureAlgorithmType": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MLDSAAlgorithmEnum"
+        },
+        {
+          "$ref": "#/$defs/LegacySignatureAlgEnum"
+        }
+      ],
+      "description": "G19. Accepted signature algorithm: ML-DSA (post-quantum) or legacy JOSE. ML-DSA-65 recommended for new a2-schema documents."
+    },
+    "MLDSAAlgorithmEnum": {
+      "type": "string",
+      "enum": [
+        "ML-DSA-44",
+        "ML-DSA-65",
+        "ML-DSA-87"
+      ],
+      "description": "G19. NIST FIPS 204 Module-Lattice Digital Signature Algorithm identifiers. IETF draft-ietf-jose-post-quantum-algorithms. ML-DSA-44: NIST L2, pubkey 1312B, sig 2420B. ML-DSA-65: NIST L3, pubkey 1952B, sig 3293B (recommended). ML-DSA-87: NIST L5, pubkey 2592B, sig 4595B (legal/archival).",
+      "x-a2-spec": "G19",
+      "x-nist": "FIPS 204",
+      "x-ietf": "draft-ietf-jose-post-quantum-algorithms"
+    },
+    "LegacySignatureAlgEnum": {
+      "type": "string",
+      "enum": [
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "EdDSA",
+        "PS256",
+        "PS384",
+        "PS512"
+      ],
+      "description": "Legacy JOSE signature algorithms (RFC 7518) for backward compatibility. Prefer ML-DSA-* for new documents. EdDSA covers Ed25519/Ed448."
+    },
+    "JAdESProfileEnum": {
+      "type": "string",
+      "enum": [
+        "B-B",
+        "B-T",
+        "B-LT",
+        "B-LTA"
+      ],
+      "description": "JAdES conformance profile (ETSI TS 119 182-1). B-B: Basic signature. B-T: Basic + RFC3161 timestamp. B-LT: Long-term (timestamp + cert + revocation data embedded). B-LTA: Long-term with archive timestamp.",
+      "x-etsi": "ETSI TS 119 182-1"
+    },
+    "JCSCanonicalizationEnum": {
+      "type": "string",
+      "enum": [
+        "RFC8785-JCS",
+        "RFC8785-JCS+sort"
+      ],
+      "description": "G19. Payload canonicalization method before base64url-encoding into JWS payload. RFC 8785 JSON Canonicalization Scheme (JCS) is the a2-schema standard. The signing payload is canonical_json(block excluding [$signature, $hashChain]).",
+      "x-ietf": "RFC 8785"
+    },
+    "JWSProtectedHeaderDecoded": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "$ref": "#/$defs/SignatureAlgorithmType",
+          "description": "REQUIRED. Signature algorithm identifier."
+        },
+        "kid": {
+          "type": "string",
+          "description": "Key ID. URN recommended: 'urn:key:<id>'. Matches the key in the JWKS at jku."
+        },
+        "typ": {
+          "type": "string",
+          "description": "Media type of the JWS. Use 'a2-schema+block' for per-block signatures, 'a2-schema+root' for root-level.",
+          "examples": [
+            "a2-schema+block",
+            "a2-schema+root",
+            "JOSE"
+          ]
+        },
+        "cty": {
+          "type": "string",
+          "description": "Content type of the payload. 'application/a2-schema' or 'application/json'.",
+          "default": "application/a2-schema"
+        },
+        "b64": {
+          "type": "boolean",
+          "description": "RFC 7797 unencoded payload flag. true (default) = payload is base64url-encoded. false = payload is attached unencoded (use only when payload size is critical).",
+          "default": true
+        },
+        "crit": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Critical header parameters that MUST be understood. Include 'sigT' when using JAdES signing time, 'b64' when present and non-default.",
+          "examples": [
+            [
+              "sigT",
+              "b64"
+            ],
+            [
+              "sigT"
+            ]
+          ]
+        },
+        "sigT": {
+          "type": "string",
+          "format": "date-time",
+          "description": "JAdES signing time (ETSI TS 119 182-1 §5.2.3). ISO 8601 UTC. MUST be in crit when present. Constitutes the B-T baseline."
+        },
+        "iat": {
+          "type": "integer",
+          "description": "JWT/JOSE issued-at epoch seconds (RFC 7519). Redundant with sigT but included for JOSE tool compatibility."
+        },
+        "x5c": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "X.509 certificate chain (RFC 7515 §4.1.6). Base64-encoded DER. Index 0 = signing certificate. For ML-DSA: use OQS-generated X.509 with OID 2.16.840.1.101.3.4.3.17 (ML-DSA-44), .18 (ML-DSA-65), .19 (ML-DSA-87).",
+          "minItems": 1
+        },
+        "x5t#S256": {
+          "type": "string",
+          "description": "SHA-256 thumbprint of the signing certificate (RFC 7515 §4.1.8). Base64url-encoded. Enables certificate identification without full chain.",
+          "pattern": "^[A-Za-z0-9\\-_]{43}$"
+        },
+        "x5u": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI to the X.509 certificate chain (RFC 7515 §4.1.5). Alternative to x5c for size reduction."
+        },
+        "jku": {
+          "type": "string",
+          "format": "uri",
+          "description": "JWKS URI where the signing key's public key can be retrieved (RFC 7515 §4.1.2). e.g. 'https://a2-schema.org/keys/v1'."
+        }
+      },
+      "required": [
+        "alg"
+      ],
+      "description": "G19. JWS Protected Header — decoded form for schema validation and AI readability. The 'protected' field in BlockSignature is base64url(JSON.stringify(this object)).",
+      "x-a2-spec": "G19",
+      "x-ietf": "RFC 7515 §4"
+    },
+    "JAdESSigTst": {
+      "type": "object",
+      "properties": {
+        "sigTst": {
+          "type": "object",
+          "properties": {
+            "tstTokens": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "val": {
+                    "type": "string",
+                    "description": "Base64url-encoded RFC 3161 TimeStampToken (DER). Obtained from a TSA (Time Stamp Authority) over the signature value bytes."
+                  },
+                  "tsa": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URI of the TSA that issued this timestamp token."
+                  }
+                },
+                "required": [
+                  "val"
+                ]
+              },
+              "minItems": 1,
+              "description": "RFC 3161 timestamp tokens over the JWS signature value. Presence satisfies JAdES B-T requirement."
+            }
+          },
+          "required": [
+            "tstTokens"
+          ],
+          "description": "JAdES sigTst (signature timestamp). ETSI TS 119 182-1 §5.3.4."
+        }
+      },
+      "required": [
+        "sigTst"
+      ],
+      "description": "JAdES etsiU entry: signature timestamp. Satisfies B-T conformance.",
+      "x-etsi": "ETSI TS 119 182-1 §5.3.4"
+    },
+    "JAdESXVals": {
+      "type": "object",
+      "properties": {
+        "xVals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "x509Cert": {
+                "type": "object",
+                "properties": {
+                  "val": {
+                    "type": "string",
+                    "description": "Base64-encoded DER X.509 certificate."
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Optional URI for online retrieval."
+                  }
+                },
+                "required": [
+                  "val"
+                ]
+              }
+            },
+            "required": [
+              "x509Cert"
+            ]
+          },
+          "minItems": 1,
+          "description": "Certificate values for long-term validation. Embeds the full certificate chain needed to validate the signature even after online sources become unavailable."
+        }
+      },
+      "required": [
+        "xVals"
+      ],
+      "description": "JAdES etsiU entry: certificate values. Required for B-LT conformance.",
+      "x-etsi": "ETSI TS 119 182-1 §5.3.5"
+    },
+    "JAdESRVals": {
+      "type": "object",
+      "properties": {
+        "rVals": {
+          "type": "object",
+          "properties": {
+            "crlVals": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "val": {
+                    "type": "string",
+                    "description": "Base64-encoded DER Certificate Revocation List (RFC 5280)."
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                },
+                "required": [
+                  "val"
+                ]
+              },
+              "description": "CRL revocation values."
+            },
+            "ocspVals": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "val": {
+                    "type": "string",
+                    "description": "Base64-encoded DER OCSPResponse (RFC 6960)."
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                },
+                "required": [
+                  "val"
+                ]
+              },
+              "description": "OCSP response values."
+            }
+          },
+          "anyOf": [
+            {
+              "properties": {
+                "crlVals": true
+              },
+              "required": [
+                "crlVals"
+              ]
+            },
+            {
+              "properties": {
+                "ocspVals": true
+              },
+              "required": [
+                "ocspVals"
+              ]
+            }
+          ],
+          "description": "Revocation data for the certificate chain. At least one of crlVals or ocspVals is required."
+        }
+      },
+      "required": [
+        "rVals"
+      ],
+      "description": "JAdES etsiU entry: revocation values (CRL + OCSP). Required for B-LT conformance.",
+      "x-etsi": "ETSI TS 119 182-1 §5.3.5"
+    },
+    "JAdESTstVD": {
+      "type": "object",
+      "properties": {
+        "tstVD": {
+          "type": "object",
+          "properties": {
+            "tstTokens": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "val": {
+                    "type": "string",
+                    "description": "Base64url-encoded RFC 3161 archive timestamp token over the LT-level data (signature + sigTst + xVals + rVals)."
+                  },
+                  "tsa": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                },
+                "required": [
+                  "val"
+                ]
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tstTokens"
+          ],
+          "description": "Archive validation data timestamp. Satisfies B-LTA requirement."
+        }
+      },
+      "required": [
+        "tstVD"
+      ],
+      "description": "JAdES etsiU entry: archive timestamp (tstVD). Satisfies B-LTA conformance.",
+      "x-etsi": "ETSI TS 119 182-1 §5.3.6"
+    },
+    "JAdESEtsiUEntry": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JAdESSigTst"
+        },
+        {
+          "$ref": "#/$defs/JAdESXVals"
+        },
+        {
+          "$ref": "#/$defs/JAdESRVals"
+        },
+        {
+          "$ref": "#/$defs/JAdESTstVD"
+        }
+      ],
+      "description": "G19. One entry in the JAdES etsiU array (unsigned properties). Entries are applied in order to achieve higher conformance levels: B-B→B-T(+sigTst)→B-LT(+xVals+rVals)→B-LTA(+tstVD).",
+      "x-etsi": "ETSI TS 119 182-1 §5.3"
+    },
+    "BlockSignature": {
+      "type": "object",
+      "description": "G19. Per-block JWS Flattened JSON Serialization (RFC 7515 §7.2.2) with JAdES extensions (ETSI TS 119 182-1). Signs the canonical JSON of the containing block (RFC 8785 JCS) using ML-DSA or legacy JOSE algorithms. Embedded directly in the signed block as '$signature'.",
+      "x-a2-spec": "G19",
+      "x-ietf": "RFC 7515 §7.2.2",
+      "x-etsi": "ETSI TS 119 182-1",
+      "x-nist": "FIPS 204",
+      "properties": {
+        "protected": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9\\-_]+$",
+          "description": "REQUIRED. Base64url-encoded JWS Protected Header (RFC 7515 §4). Decoded form is described by JWSProtectedHeaderDecoded. Contains: alg, kid, typ, sigT, crit, x5c, x5t#S256, b64. Integrity of protected header is covered by the signature."
+        },
+        "_protectedDecoded": {
+          "$ref": "#/$defs/JWSProtectedHeaderDecoded",
+          "description": "NON-NORMATIVE. Human-readable decoded form of 'protected' (base64url decode → JSON parse). Provided for AI readability and debugging. NOT part of the signature computation — derived from 'protected'."
+        },
+        "header": {
+          "type": "object",
+          "properties": {
+            "etsiU": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/JAdESEtsiUEntry"
+              },
+              "description": "JAdES unsigned properties (etsiU). Not covered by the signature — can be added after signing to upgrade conformance level. Sequence: [sigTst?, xVals?, rVals?, tstVD?].",
+              "x-etsi": "ETSI TS 119 182-1 §5.3"
+            },
+            "cty": {
+              "type": "string",
+              "description": "Unprotected content type hint. Usually redundant with protected.cty."
+            }
+          },
+          "description": "JWS Unprotected Header (RFC 7515 §4.1). NOT integrity-protected by the signature. Used for JAdES etsiU entries (timestamps, certificate/revocation data)."
+        },
+        "payload": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9\\-_]+$",
+          "description": "REQUIRED. Base64url-encoded signing payload (RFC 7515 §3). Payload is: base64url(RFC8785_JCS_canonical_JSON(block EXCLUDING [$signature, $hashChain])). The payload reconstruction algorithm: (1) deep-copy block, (2) delete '$signature' and '$hashChain' keys, (3) RFC8785-JCS-canonicalize, (4) base64url-encode.",
+          "x-signing-scope": "block-excluding-$signature-$hashChain",
+          "x-canonicalization": "RFC8785-JCS"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9\\-_]+$",
+          "description": "REQUIRED. Base64url-encoded signature bytes (RFC 7515 §3). For ML-DSA-65: 3293-byte deterministic signature. Input to signing function: ASCII(base64url(protected) || '.' || base64url(payload)).",
+          "x-ml-dsa-sig-input": "ASCII(base64url(protected) + '.' + base64url(payload))",
+          "x-ml-dsa-44-sig-bytes": 2420,
+          "x-ml-dsa-65-sig-bytes": 3293,
+          "x-ml-dsa-87-sig-bytes": 4595
+        },
+        "jadesProfile": {
+          "$ref": "#/$defs/JAdESProfileEnum",
+          "description": "Declared JAdES conformance profile achieved by this signature. Informative — verifier must confirm from etsiU contents."
+        },
+        "canonicalization": {
+          "$ref": "#/$defs/JCSCanonicalizationEnum",
+          "description": "Canonicalization method applied to the block before payload encoding. Default: RFC8785-JCS.",
+          "default": "RFC8785-JCS"
+        },
+        "signingTarget": {
+          "type": "string",
+          "description": "Informative. Identifies the block being signed, typically the $tag + @id of the signed node. e.g. 'Entity#ent-01970000-...'."
+        },
+        "signedProperties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Informative. List of top-level properties included in the signing payload. Derived from the block's properties minus ['$signature', '$hashChain']. Used for change detection without full re-canonicalization."
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "dependentRequired": {
+        "_protectedDecoded": []
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "jadesProfile": {
+                "enum": [
+                  "B-T",
+                  "B-LT",
+                  "B-LTA"
+                ]
+              }
+            },
+            "required": [
+              "jadesProfile"
+            ]
+          },
+          "then": {
+            "properties": {
+              "header": {
+                "properties": {
+                  "etsiU": {
+                    "contains": {
+                      "$ref": "#/$defs/JAdESSigTst"
+                    },
+                    "minContains": 1
+                  }
+                },
+                "required": [
+                  "etsiU"
+                ]
+              }
+            },
+            "$comment": "B-T and above: etsiU MUST contain at least one sigTst (RFC 3161 timestamp token over signature value)."
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "jadesProfile": {
+                "enum": [
+                  "B-LT",
+                  "B-LTA"
+                ]
+              }
+            },
+            "required": [
+              "jadesProfile"
+            ]
+          },
+          "then": {
+            "properties": {
+              "header": {
+                "properties": {
+                  "etsiU": {
+                    "allOf": [
+                      {
+                        "contains": {
+                          "$ref": "#/$defs/JAdESXVals"
+                        },
+                        "minContains": 1
+                      },
+                      {
+                        "contains": {
+                          "$ref": "#/$defs/JAdESRVals"
+                        },
+                        "minContains": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "etsiU"
+                ]
+              }
+            },
+            "$comment": "B-LT and above: etsiU MUST contain xVals (certificate chain) and rVals (revocation data) for long-term validation without online lookups."
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "jadesProfile": {
+                "const": "B-LTA"
+              }
+            },
+            "required": [
+              "jadesProfile"
+            ]
+          },
+          "then": {
+            "properties": {
+              "header": {
+                "properties": {
+                  "etsiU": {
+                    "contains": {
+                      "$ref": "#/$defs/JAdESTstVD"
+                    },
+                    "minContains": 1
+                  }
+                },
+                "required": [
+                  "etsiU"
+                ]
+              }
+            },
+            "$comment": "B-LTA: etsiU MUST contain tstVD (archive timestamp over LT-level data) for archival-grade long-term validation."
+          }
+        }
+      ]
+    },
+    "BlockHashChain": {
+      "type": "object",
+      "description": "G20. Per-block lightweight HashChain anchor. Links each signed block into the document-level hash chain managed by hash-chain-api. Enables tamper detection for individual block deletion, insertion, or reordering — without requiring full document re-validation.",
+      "x-a2-spec": "G20",
+      "properties": {
+        "blockId": {
+          "type": "string",
+          "description": "Identifies the block being chained. Typically the block's @id (NodeIdType) or '$tag#<sequential-position>' for id-less blocks."
+        },
+        "blockHash": {
+          "type": "string",
+          "pattern": "^(sha256|sha384|sha512):[0-9a-f]{64,128}$",
+          "description": "Hash of the canonical block content (RFC 8785 JCS, same scope as BlockSignature payload). Format: '<algorithm>:<hex-digest>'. e.g. 'sha256:a3b4c5d6...'.",
+          "examples": [
+            "sha256:a3b4c5d6e7f8091a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5"
+          ]
+        },
+        "prevHash": {
+          "type": "string",
+          "pattern": "^(sha256|sha384|sha512):[0-9a-f]{64,128}$",
+          "description": "Hash of the previous block in the document-ordered chain. 'sha256:0000...0' (64 zeros) for the genesis block (first block in the document). Linking formula: blockHash = H(prevHash || canonical(block))."
+        },
+        "docChainRef": {
+          "type": "string",
+          "description": "Reference to the document-level chain (matches HashChain.DocumentID in Header). Allows multiple documents to share a chain namespace."
+        },
+        "seqNo": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based sequence number of this block within the document chain. Must be monotonically increasing. Enables gap detection (missing blocks)."
+        },
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "SHA256",
+            "SHA384",
+            "SHA512"
+          ],
+          "default": "SHA256",
+          "description": "Hash algorithm for blockHash and prevHash. SHA256 recommended; SHA384/SHA512 for archival-grade documents."
+        },
+        "linkedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp when this block was appended to the hash chain. Set by hash-chain-api or SDK at document-writing time."
+        },
+        "serviceRef": {
+          "type": "string",
+          "format": "uri",
+          "description": "hash-chain-api endpoint for independent verification. POST /hash-chain/verify with blockHash + prevHash + seqNo to confirm chain integrity. e.g. 'https://hash-chain-api-xxx.run.app/hash-chain/verify'."
+        },
+        "chainSignature": {
+          "type": "object",
+          "properties": {
+            "alg": {
+              "$ref": "#/$defs/MLDSAAlgorithmEnum",
+              "description": "ML-DSA algorithm used to sign the chain entry."
+            },
+            "kid": {
+              "type": "string",
+              "description": "Key ID of the signing key (hash-chain-api service key)."
+            },
+            "sig": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9\\-_]+$",
+              "description": "Base64url-encoded ML-DSA signature over: prevHash || blockHash || seqNo || linkedAt (UTF-8, concatenated)."
+            },
+            "signedBy": {
+              "type": "string",
+              "format": "uri",
+              "description": "URI/URN of the hash-chain-api signer (service identity)."
+            }
+          },
+          "required": [
+            "alg",
+            "sig"
+          ],
+          "description": "ML-DSA signature over the chain entry itself (prevHash || blockHash || seqNo || linkedAt). Issued by hash-chain-api. Enables verification of each chain link without trusting the embedding document."
+        }
+      },
+      "required": [
+        "blockHash",
+        "prevHash",
+        "seqNo"
+      ],
+      "allOf": [
+        {
+          "$comment": "ASSERT: seqNo must be >= 1 (genesis block = 1). Enforced by minimum:1 above.",
+          "x-assert": "seqNo >= 1"
+        },
+        {
+          "$comment": "ASSERT: prevHash for seqNo=1 MUST be '000...0' (genesis sentinel). Runtime enforcement by SDK.",
+          "x-assert": "if seqNo == 1 then prevHash == 'sha256:' + '0'.repeat(64)"
+        }
+      ]
+    },
+    "_____HIERARCHY_____": {
+      "description": "─── §8 16-Layer G17 Hierarchy (anyOf substitutionGroup chains) ──────────"
+    },
+    "AnyNode": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Entity"
+        },
+        {
+          "$ref": "#/$defs/Value"
+        },
+        {
+          "$ref": "#/$defs/ValueDesc"
+        },
+        {
+          "$ref": "#/$defs/ValueBlock"
+        },
+        {
+          "$ref": "#/$defs/SemanticBlock"
+        },
+        {
+          "$ref": "#/$defs/Log"
+        },
+        {
+          "$ref": "#/$defs/Ref"
+        },
+        {
+          "$ref": "#/$defs/Signature"
+        },
+        {
+          "$ref": "#/$defs/HashChain"
+        },
+        {
+          "$ref": "#/$defs/Actor"
+        },
+        {
+          "$ref": "#/$defs/Author"
+        },
+        {
+          "$ref": "#/$defs/ApprovedBy"
+        },
+        {
+          "$ref": "#/$defs/IssuedBy"
+        },
+        {
+          "$ref": "#/$defs/Instruction"
+        },
+        {
+          "$ref": "#/$defs/AIAction"
+        },
+        {
+          "$ref": "#/$defs/AuditSession"
+        }
+      ],
+      "description": "G17 + a2: Node substitution group. a2-schema built-in nodes plus AI Audit types. v4.0: adds Instruction/AIAction/AuditSession for AI Robot × AI Audit. x-a2-tier aware: extract_tier.py populates per-tier AnyNode."
+    },
+    "_____DOCUMENT_TYPES_____": {
+      "description": "─── §9 Document-Level Types (Header, Root) ──────────────────────────────"
+    },
+    "Header": {
+      "type": "object",
+      "properties": {
+        "groundingPolicy": {
+          "$ref": "#/$defs/GroundingPolicyEnum"
+        },
+        "docId": {
+          "type": "string"
+        },
+        "schemaVersion": {
+          "type": "string",
+          "description": "Use 'v0.0.2' for a2-schema documents."
+        },
+        "organization": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "default": "1.0.0"
+        },
+        "actors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnyActorNode"
+          }
+        },
+        "sLogicRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sLogicRef"
+          }
+        },
+        "semanticRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SemanticRef"
+          }
+        },
+        "contextRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContextRef"
+          }
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          }
+        },
+        "context": {
+          "type": "string"
+        },
+        "hashChain": {
+          "$ref": "#/$defs/HashChain",
+          "description": "G18. Document-level hash chain."
+        },
+        "mldsaKeys": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kid": {
+                "type": "string",
+                "description": "Key ID. Referenced by BlockSignature._protectedDecoded.kid and Signature.keyId."
+              },
+              "alg": {
+                "$ref": "#/$defs/MLDSAAlgorithmEnum"
+              },
+              "use": {
+                "type": "string",
+                "enum": [
+                  "sig"
+                ],
+                "default": "sig"
+              },
+              "kty": {
+                "type": "string",
+                "const": "OKP",
+                "description": "JOSE key type. OKP (Octet Key Pair) for lattice-based keys per IETF draft."
+              },
+              "pub": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9\\-_]+$",
+                "description": "Base64url-encoded ML-DSA public key. ML-DSA-44: 1312B, ML-DSA-65: 1952B, ML-DSA-87: 2592B."
+              },
+              "x5c": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "X.509 certificate chain (base64-encoded DER). OID: 2.16.840.1.101.3.4.3.17/.18/.19 for ML-DSA-44/65/87."
+              },
+              "x5t#S256": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9\\-_]{43}$"
+              },
+              "active": {
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": [
+              "kid",
+              "alg",
+              "pub"
+            ]
+          },
+          "description": "G19. ML-DSA public key registry for this document. Lists the verification keys for all $signature entries. Enables offline signature verification without network access.",
+          "x-a2-spec": "G19"
+        },
+        "chainPolicy": {
+          "type": "object",
+          "properties": {
+            "requiredOnEntity": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, every Entity MUST have $hashChain."
+            },
+            "requiredOnLog": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, every Log MUST have $hashChain."
+            },
+            "signatureRequiredOn": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "Entity",
+                  "Log",
+                  "ValueBlock",
+                  "SemanticBlock",
+                  "Value",
+                  "Ref"
+                ]
+              },
+              "description": "Block types that MUST carry $signature in this document."
+            },
+            "defaultJAdESProfile": {
+              "$ref": "#/$defs/JAdESProfileEnum",
+              "default": "B-B"
+            },
+            "defaultMLDSAAlgorithm": {
+              "$ref": "#/$defs/MLDSAAlgorithmEnum",
+              "default": "ML-DSA-65"
+            },
+            "canonicalization": {
+              "$ref": "#/$defs/JCSCanonicalizationEnum",
+              "default": "RFC8785-JCS"
+            }
+          },
+          "description": "G19/G20. Document-level policy declaring signature and chain requirements. If signatureRequiredOn contains 'Entity', every Entity $signature becomes required rather than optional.",
+          "x-a2-spec": "G19"
+        }
+      },
+      "required": [
+        "docId",
+        "version"
+      ],
+      "description": "G13. Document governance header. v0.0.2: adds mldsaKeys (public key registry) and chainPolicy (signature/chain requirements).",
+      "x-a2-spec": "G13"
+    },
+    "Root": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "Should be 'https://a2-schema.org/v0.0.2/schema.json'."
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "type": {
+          "type": "string"
+        },
+        "subtype": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "G14. Document event time. MUST be <= recordedAt."
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "G14. System ingestion time. MUST be >= observedAt."
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "derivedFrom": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "attributedTo": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "pii": {
+          "type": "boolean"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "quality": {
+          "$ref": "#/$defs/QualityEnum"
+        },
+        "industry": {
+          "$ref": "#/$defs/MaskListType"
+        },
+        "usecase": {
+          "$ref": "#/$defs/MaskListType"
+        },
+        "protechfun": {
+          "$ref": "#/$defs/MaskListType"
+        },
+        "header": {
+          "$ref": "#/$defs/Header",
+          "description": "Required. G13 document header."
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnyNode"
+          },
+          "description": "G17. Document body. All 16-layer node types. v0.0.2: nodes can carry $signature/$hashChain."
+        },
+        "$signature": {
+          "$ref": "#/$defs/BlockSignature",
+          "description": "G19. Optional root-level ML-DSA/JWS signature. Recommended profile: B-LTA (archival). Payload = RFC8785(root excluding [$signature]). Signs the entire document including header and all nodes. Use ML-DSA-87 for legal/government documents.",
+          "x-a2-spec": "G19",
+          "x-jades-profile-recommended": "B-LTA",
+          "x-ml-dsa-recommended": "ML-DSA-87"
+        }
+      },
+      "required": [
+        "header"
+      ],
+      "dependentRequired": {
+        "subtype": [
+          "type"
+        ]
+      },
+      "allOf": [
+        {
+          "$comment": "G14 ASSERT: observedAt <= recordedAt.",
+          "x-assert": "observedAt <= recordedAt",
+          "x-a2-spec": "G14"
+        },
+        {
+          "$comment": "ASSERT: validFrom <= validTo.",
+          "x-assert": "validFrom <= validTo"
+        },
+        {
+          "$comment": "G15 ASSERT: every approver with signatureRef must have matching Signature@id in document. Partial JSON Schema; full check by SDK.",
+          "x-assert": "every approver-actor with signatureRef resolves to Signature@id in document",
+          "x-a2-spec": "G15"
+        },
+        {
+          "if": {
+            "properties": {
+              "header": {
+                "properties": {
+                  "actors": {
+                    "contains": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "$tag": {
+                              "const": "ApprovedBy"
+                            },
+                            "signatureRef": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "$tag",
+                            "signatureRef"
+                          ]
+                        },
+                        {
+                          "properties": {
+                            "$tag": {
+                              "const": "Actor"
+                            },
+                            "role": {
+                              "const": "approver"
+                            },
+                            "signatureRef": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "$tag",
+                            "role",
+                            "signatureRef"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "actors"
+                ]
+              }
+            },
+            "required": [
+              "header"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nodes": {
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "$tag": {
+                      "const": "Signature"
+                    },
+                    "id": {
+                      "$ref": "#/$defs/NodeIdType"
+                    }
+                  },
+                  "required": [
+                    "$tag",
+                    "id"
+                  ]
+                },
+                "minContains": 1
+              }
+            },
+            "$comment": "G15 partial: approver with signatureRef exists → nodes MUST contain >= 1 Signature with id. Full id-equality match requires SDK runtime. Fix 2026-05-12: 'header' and 'header.actors' required inside if-clause so the then-branch no longer fires vacuously when either is absent."
+          }
+        },
+        {
+          "$comment": "G19 chainPolicy enforcement: when header.chainPolicy.requiredOnEntity=true, all Entity nodes MUST have $hashChain. SDK runtime enforcement.",
+          "x-assert": "if header.chainPolicy.requiredOnEntity then every Entity in nodes has $hashChain",
+          "x-a2-spec": "G19"
+        },
+        {
+          "$comment": "G20 chain continuity: seqNo values across all $hashChain entries must be unique and monotonically increasing. SDK runtime enforcement.",
+          "x-assert": "all $hashChain.seqNo values are unique and form a contiguous sequence 1..N",
+          "x-a2-spec": "G20"
+        },
+        {
+          "$comment": "G9 ASSERT: every '#id'-form reference resolves to an existing @id in this document. Runtime SDK.",
+          "x-assert": "every '#'-prefixed Ref@to, Ref@from, @source, @derivedFrom, @attributedTo resolves to a node @id",
+          "x-a2-spec": "G9"
+        }
+      ],
+      "description": "RootType. Top-level a2-schema v0.0.2 document. v0.0.2: adds root-level $signature (B-LTA) and enforces chainPolicy. Header adds mldsaKeys registry and chainPolicy."
+    },
+    "A2Envelope": {
+      "type": "object",
+      "description": "doc+a2 ENVELOPE (spec: docs/apps/a2-schema-editor/doc-a2.md). Attaches a2 capability to an ordinary document. `content` is THE one unstructured dump slot: a SemanticBlock (prose/mixed; carries its own $signature/$hashChain — per-content integrity) or an ExternalPayload (sealed/binary). Detached mode: a SemanticBlock with `source` pointing at the document file and content [] — its $hashChain.blockHash covers the file bytes. `commitments` is the only structured data, validated by the INLINED self-contained `profile` (offline verification from this file alone). OpenAPI-style: this def is the one stable format schema; per-doctype profiles validate only `commitments`.",
+      "x-a2-spec": "DOC-A2",
+      "properties": {
+        "$tag": {
+          "const": "A2Envelope"
+        },
+        "a2": {
+          "type": "string",
+          "description": "Envelope format version, e.g. '0.1'."
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "groundingPolicy": {
+          "$ref": "#/$defs/GroundingPolicyEnum",
+          "description": "AI-use governance for this document (doc-a2 sets it; default 'strict')."
+        },
+        "docType": {
+          "type": "string",
+          "description": "Document kind, e.g. 'nda-mutual', 'robot-instruction'."
+        },
+        "content": {
+          "description": "THE unstructured document dump.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticBlock"
+            },
+            {
+              "$ref": "#/$defs/ExternalPayload"
+            }
+          ]
+        },
+        "profile": {
+          "type": "object",
+          "description": "Self-contained JSON Schema validating `commitments` — inlined."
+        },
+        "commitments": {
+          "type": "object",
+          "description": "The validated commitment values — the only structured data."
+        },
+        "extractedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "extractor": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "heuristic",
+                "ai",
+                "human"
+              ]
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "version": {
+          "type": "string",
+          "description": "Document version, e.g. '1.0.0' — bumped on each save."
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A2HistoryEntry"
+          },
+          "description": "Save history (git-commit style): version + comment per save."
+        },
+        "$signature": {
+          "$ref": "#/$defs/BlockSignature",
+          "description": "Signature over the canonical envelope (RFC 8785 JCS) — signs content integrity + commitments in one stroke."
+        },
+        "chain": {
+          "$ref": "#/$defs/HashChain",
+          "description": "Document-level hash chain (hash-chain-api receipt)."
+        },
+        "signingRecipe": {
+          "$ref": "#/$defs/A2SigningRecipe",
+          "description": "doc-a2 CONFIG (not the signature): the recipe the a2-sign app follows to fill $signature + chain. doc-a2 sets it; the sig app writes the real BlockSignature/HashChain."
+        }
+      },
+      "required": [
+        "$tag",
+        "a2",
+        "docType",
+        "content",
+        "commitments"
+      ]
+    },
+    "A2SigningRecipe": {
+      "type": "object",
+      "description": "doc-a2 signing/chain RECIPE (config, not crypto). doc-a2 fills this; the a2-sign app reads it and writes the real $signature (BlockSignature) + chain (HashChain), which stay strict. Anti-falsification + AI-audit only — NOT identity (no IAL/AAL/FAL).",
+      "x-a2-spec": "DOC-A2",
+      "properties": {
+        "algorithm": {
+          "$ref": "#/$defs/SignatureAlgorithmType",
+          "description": "JOSE signature alg id (scheme+hash) — NOT a key size. UI labels: Ed25519='EdDSA', ML-DSA-65, RSA-4096='PS256' (RSA-PSS; the 4096 is the key size, in keyRef)."
+        },
+        "keyRef": {
+          "type": "string",
+          "description": "Reference to the signing key — NEVER the key material. Local 'file:///path/key.pem' | AWS 'arn:aws:kms:<region>:<acct>:key/<id>' | GCP 'gcp-kms://projects/<p>/locations/<l>/keyRings/<r>/cryptoKeys/<k>/cryptoKeyVersions/<v>'."
+        },
+        "certificate": {
+          "type": "string",
+          "description": "Public-key certificate a VERIFIER uses to check the integrity signature (x5u URL or identifier). Anti-falsification only — the identity assurance behind the cert (IAL/AAL/FAL) is the sig app's concern, not doc-a2's."
+        },
+        "hashAlgorithm": {
+          "type": "string",
+          "description": "Hash for content + chain, e.g. 'SHA-256' / 'SHA-512'."
+        },
+        "chainEndpoint": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "hash-chain-api endpoint, e.g. 'https://<host>/hash-chain/append'; the backend routes to the chosen store (BigQuery/Firestore)."
+        },
+        "chainNamespace": {
+          "type": "string",
+          "description": "Partition/scope of the hash chain (which isolated tamper-evident chain this document joins — per org/region/project, so entries don't intermix)."
+        }
+      }
+    },
+    "A2HistoryEntry": {
+      "type": "object",
+      "description": "One save in A2Envelope.history (git-commit style): the document version saved + an optional comment + when.",
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "version",
+        "at"
+      ]
+    },
+    "_____AI_AUDIT_TYPES_____": {
+      "description": "─── §10 AI Audit Node Types (Instruction / AIAction / AuditSession) ──────"
+    },
+    "Instruction": {
+      "type": "object",
+      "$comment": "a2 new. Human/system instruction to AI robot. Primary a2-sign SDK signature target. EU AI Act: human oversight record. SDK runtime validation: '#<NodeId>' cross-references not validated by JSON Schema.",
+      "x-a2-sign-target": true,
+      "properties": {
+        "$tag": {
+          "const": "Instruction"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "schedule",
+            "behavior",
+            "constraint",
+            "emergency",
+            "preference",
+            "order"
+          ],
+          "description": "指示種別。schedule=起床/就寝時刻等,behavior=行動パターン,constraint=制約,emergency=緊急,preference=好み,order=順序"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "実行優先度。0=最低, 100=緊急停止"
+        },
+        "issuedBy": {
+          "type": "string",
+          "description": "指示発行者URI/URN。"
+        },
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "freshnessTTL": {
+          "type": "string"
+        },
+        "approvedBy": {
+          "type": "string",
+          "description": "承認者URI。a2-sign SDK が $signature を付与する対象。"
+        },
+        "approvedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "groundingPolicy": {
+          "$ref": "#/$defs/GroundingPolicyEnum"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "rule": {
+          "type": "string",
+          "description": "指示事前条件。例: 'subject.mobility == limited → speed <= 0.3m/s'"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Value"
+              },
+              {
+                "$ref": "#/$defs/ValueBlock"
+              },
+              {
+                "$ref": "#/$defs/Ref"
+              }
+            ]
+          },
+          "description": "指示の詳細パラメータ。"
+        },
+        "$signature": {
+          "type": "object",
+          "description": "a2-sign SDK: approvedBy が設定されている場合に必須付与。ML-DSA-65推奨。"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "type",
+        "issuedBy",
+        "issuedAt"
+      ],
+      "unevaluatedProperties": false,
+      "x-a2-branch": "G",
+      "x-a2-level": "L8"
+    },
+    "AIAction": {
+      "type": "object",
+      "$comment": "a2 new. Records AI agent inference, decision, physical action. Core node of a2 audit trail. SDK runtime validation: '#<NodeId>' cross-references not validated by JSON Schema.",
+      "x-a2-sign-target": true,
+      "properties": {
+        "$tag": {
+          "const": "AIAction"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "agentId": {
+          "type": "string",
+          "description": "AIエージェント識別子。"
+        },
+        "modelVersion": {
+          "type": "string",
+          "description": "推論モデルバージョン。再現性検証に必須。"
+        },
+        "actionType": {
+          "type": "string",
+          "enum": [
+            "inference",
+            "decision",
+            "physical",
+            "abort",
+            "escalate",
+            "noop"
+          ],
+          "description": "inference=推論のみ,decision=行動選択,physical=物理動作,abort=中断,escalate=人間エスカレーション,noop=無操作"
+        },
+        "instructionRef": {
+          "type": "string",
+          "description": "根拠Instruction@id。'#<NodeId>'形式。因果チェーン入力リンク。SDK runtime validation."
+        },
+        "groundingRefs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "推論根拠Entity/Value@idリスト。AI判断根拠の証明。'#<NodeId>'形式。SDK runtime validation."
+        },
+        "inferenceAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "推論実行時刻"
+        },
+        "executedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "物理動作開始時刻"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "動作完了時刻"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType",
+          "description": "AI推論確信度"
+        },
+        "groundingPolicy": {
+          "$ref": "#/$defs/GroundingPolicyEnum"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "success",
+            "failure",
+            "partial",
+            "aborted",
+            "escalated"
+          ],
+          "description": "実行結果"
+        },
+        "failureReason": {
+          "type": "string",
+          "description": "EU AI Act: 失敗原因の記録義務"
+        },
+        "humanOverride": {
+          "type": "boolean",
+          "default": false,
+          "description": "EU AI Act: human oversight の証拠"
+        },
+        "humanOverrideBy": {
+          "type": "string",
+          "description": "介入人間URI/URN。"
+        },
+        "humanOverrideAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sessionRef": {
+          "type": "string",
+          "description": "所属AuditSession@id。セッション跨ぎチェーン連結。SDK runtime validation."
+        },
+        "rule": {
+          "type": "string",
+          "description": "事後条件。例: 'subject.fallRisk==none AND speed<=instruction.maxSpeed'"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Value"
+              },
+              {
+                "$ref": "#/$defs/ValueBlock"
+              },
+              {
+                "$ref": "#/$defs/Log"
+              },
+              {
+                "$ref": "#/$defs/Ref"
+              }
+            ]
+          },
+          "description": "動作詳細パラメータ・センサ値・実行ログ。"
+        },
+        "$signature": {
+          "type": "object",
+          "description": "a2-sign SDK: agentId証明。ML-DSA-65必須。"
+        },
+        "$hashChain": {
+          "type": "object",
+          "description": "a2-sign SDK: セッション内順序保証。seqNoはAuditSession内連番。"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "agentId",
+        "actionType",
+        "inferenceAt"
+      ],
+      "unevaluatedProperties": false,
+      "dependentRequired": {
+        "humanOverrideBy": [
+          "humanOverride"
+        ],
+        "humanOverrideAt": [
+          "humanOverride"
+        ],
+        "failureReason": [
+          "outcome"
+        ]
+      },
+      "x-a2-branch": "H",
+      "x-a2-level": "L8"
+    },
+    "AuditSession": {
+      "type": "object",
+      "$comment": "a2 new. Container for one robot operation session. Cross-session HashChain anchor. SDK runtime validation: '#<NodeId>' cross-references not validated by JSON Schema.",
+      "x-a2-sign-target": true,
+      "properties": {
+        "$tag": {
+          "const": "AuditSession"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "sessionType": {
+          "type": "string",
+          "enum": [
+            "care",
+            "home",
+            "factory",
+            "food",
+            "medical",
+            "transport",
+            "general"
+          ],
+          "description": "ロボット運用ドメイン"
+        },
+        "agentId": {
+          "type": "string",
+          "description": "セッション実行AIエージェントURI"
+        },
+        "subjectId": {
+          "type": "string",
+          "description": "対象者/対象物URI。介護なら利用者ID。"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "prevSessionId": {
+          "type": "string",
+          "description": "前セッションAuditSession@id。セッション跨ぎHashChain連結。初回はnull。SDK runtime validation."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "completed",
+            "aborted",
+            "error"
+          ],
+          "description": "セッション状態"
+        },
+        "groundingPolicy": {
+          "$ref": "#/$defs/GroundingPolicyEnum"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceType"
+        },
+        "classification": {
+          "$ref": "#/$defs/ClassificationEnum"
+        },
+        "rule": {
+          "type": "string",
+          "description": "セッション完了条件の検証式"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "version": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Instruction"
+              },
+              {
+                "$ref": "#/$defs/AIAction"
+              },
+              {
+                "$ref": "#/$defs/Entity"
+              },
+              {
+                "$ref": "#/$defs/Log"
+              },
+              {
+                "$ref": "#/$defs/Ref"
+              },
+              {
+                "$ref": "#/$defs/ValueBlock"
+              }
+            ]
+          },
+          "description": "セッション内の全Instruction/AIAction/Log。順序がHashChainのseqNoと対応。"
+        },
+        "$hashChain": {
+          "type": "object",
+          "description": "a2-sign SDK: セッション単位HashChain。prevSessionIdの前セッション最終blockHashをこのセッション最初のprevHashとして使用。セッション跨ぎ連続性保証。"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "sessionType",
+        "agentId",
+        "startedAt"
+      ],
+      "unevaluatedProperties": false,
+      "x-a2-branch": "I",
+      "x-a2-level": "L16"
+    },
+    "SignedAt": {
+      "type": "string",
+      "format": "date-time",
+      "$comment": "§1 ISO-8601 time a node was signed."
+    },
+    "SignedBy": {
+      "type": "string",
+      "$comment": "§1 signer identity (URI/URN)."
+    },
+    "_____S4_SIGNATURE_PRIMITIVES_____": {
+      "description": "─── §4 Signature Primitives (ML-DSA, RSA, JAdES, Bundle) ───",
+      "x-a2-section": true
+    },
+    "SignatureBundle": {
+      "type": "object",
+      "$comment": "§4. Bundle of parallel signatures (ML-DSA + RSA + handwritten).",
+      "x-a2-sign-target": true,
+      "properties": {
+        "$tag": {
+          "const": "SignatureBundle"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "signatures": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/BlockSignature"
+              },
+              {
+                "$ref": "#/$defs/HandwrittenSignature"
+              },
+              {
+                "$ref": "#/$defs/BiometricCapture"
+              }
+            ]
+          }
+        },
+        "primaryAlgorithm": {
+          "$ref": "#/$defs/MLDSAAlgorithmEnum"
+        }
+      },
+      "required": [
+        "$tag",
+        "signatures"
+      ]
+    },
+    "_____S5_BIOMETRIC_____": {
+      "description": "─── §5 Biometric (ISO/IEC 19794-7 handwriting + generic) ───",
+      "x-a2-section": true
+    },
+    "BiometricTypeEnum": {
+      "type": "string",
+      "enum": [
+        "handwriting",
+        "fingerprint",
+        "voiceprint",
+        "facial",
+        "iris",
+        "vein"
+      ]
+    },
+    "HandwrittenSignature": {
+      "type": "object",
+      "$comment": "ISO/IEC 19794-7:2021 準拠 手書き署名 — 筆圧・速度・軌跡・傾き全データ。a2-Sign 含む全 DocType で使用可能。",
+      "x-a2-sign-target": true,
+      "x-a2-iso-standard": "ISO/IEC 19794-7:2021",
+      "x-a2-level": "L9",
+      "properties": {
+        "$tag": {
+          "const": "HandwrittenSignature"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "isoStandard": {
+          "type": "string",
+          "const": "ISO/IEC 19794-7:2021"
+        },
+        "signerId": {
+          "type": "string"
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "biometricData": {
+          "type": "object",
+          "properties": {
+            "strokes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "points": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        },
+                        "t": {
+                          "type": "number",
+                          "description": "ms from start"
+                        },
+                        "pressure": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "tiltX": {
+                          "type": "number"
+                        },
+                        "tiltY": {
+                          "type": "number"
+                        },
+                        "azimuth": {
+                          "type": "number"
+                        },
+                        "altitude": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "x",
+                        "y",
+                        "t"
+                      ]
+                    }
+                  },
+                  "startTime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endTime": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            },
+            "totalDuration": {
+              "type": "number"
+            },
+            "avgVelocity": {
+              "type": "number"
+            },
+            "maxVelocity": {
+              "type": "number"
+            },
+            "avgPressure": {
+              "type": "number"
+            },
+            "strokeCount": {
+              "type": "integer"
+            }
+          }
+        },
+        "deviceInfo": {
+          "type": "object",
+          "properties": {
+            "deviceModel": {
+              "type": "string"
+            },
+            "manufacturer": {
+              "type": "string"
+            },
+            "samplingRate": {
+              "type": "number"
+            },
+            "pressureLevels": {
+              "type": "integer"
+            },
+            "spatialResolution": {
+              "type": "string"
+            },
+            "calibrationDate": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "renderedImage": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "enum": [
+                "png",
+                "svg"
+              ]
+            },
+            "data": {
+              "type": "string",
+              "contentEncoding": "base64"
+            },
+            "width": {
+              "type": "integer"
+            },
+            "height": {
+              "type": "integer"
+            }
+          }
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "isoStandard",
+        "signerId",
+        "capturedAt",
+        "biometricData"
+      ]
+    },
+    "BiometricCapture": {
+      "type": "object",
+      "$comment": "§5. Generic biometric capture.",
+      "properties": {
+        "$tag": {
+          "const": "BiometricCapture"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "captureType": {
+          "$ref": "#/$defs/BiometricTypeEnum"
+        },
+        "isoStandard": {
+          "type": "string"
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "data": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "qualityScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        }
+      },
+      "required": [
+        "$tag",
+        "captureType"
+      ]
+    },
+    "_____S6_SIGNING_CEREMONY_____": {
+      "description": "─── §6 SigningCeremony (generic, all DocTypes) ───",
+      "x-a2-section": true
+    },
+    "IALLevel": {
+      "type": "string",
+      "enum": [
+        "IAL1",
+        "IAL2",
+        "IAL3"
+      ]
+    },
+    "AALLevel": {
+      "type": "string",
+      "enum": [
+        "AAL1",
+        "AAL2",
+        "AAL3"
+      ]
+    },
+    "FALLevel": {
+      "type": "string",
+      "enum": [
+        "FAL1",
+        "FAL2",
+        "FAL3"
+      ]
+    },
+    "CeremonyTypeEnum": {
+      "type": "string",
+      "enum": [
+        "contract",
+        "consent",
+        "authorization",
+        "attestation",
+        "delegation",
+        "will",
+        "medical-consent",
+        "regulatory-filing"
+      ]
+    },
+    "CeremonyParticipant": {
+      "type": "object",
+      "properties": {
+        "actorId": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "signedAt": {
+          "$ref": "#/$defs/SignedAt"
+        },
+        "ialLevel": {
+          "$ref": "#/$defs/IALLevel"
+        },
+        "aalLevel": {
+          "$ref": "#/$defs/AALLevel"
+        },
+        "falLevel": {
+          "$ref": "#/$defs/FALLevel"
+        }
+      }
+    },
+    "SigningCeremony": {
+      "type": "object",
+      "$comment": "§6. 汎用署名儀式 — 全 DocType で再利用可能。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L8",
+      "properties": {
+        "$tag": {
+          "const": "SigningCeremony"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "ceremonyType": {
+          "$ref": "#/$defs/CeremonyTypeEnum"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CeremonyParticipant"
+          }
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "ipAddress": {
+              "type": "string"
+            },
+            "geolocation": {
+              "type": "string"
+            },
+            "deviceInfo": {
+              "type": "string"
+            }
+          }
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "ceremonyType",
+        "participants"
+      ]
+    },
+    "_____S8_CONTRACT_PRIMITIVES_____": {
+      "description": "─── §8 Contract Primitives (integrated from contract module) ───",
+      "x-a2-section": true
+    },
+    "ContractClause": {
+      "type": "object",
+      "description": "A contract clause. Extends GV SemanticBlock with taxonomy, numbering, and legal-basis tagging.",
+      "properties": {
+        "$tag": {
+          "const": "Clause"
+        },
+        "clauseType": {
+          "$ref": "#/$defs/ClauseTypeEnum"
+        },
+        "clauseNumber": {
+          "type": "string",
+          "description": "e.g., '3.2', 'Article IV', '第3条'."
+        },
+        "displayLabel": {
+          "type": "string"
+        },
+        "displayLabelLocale": {
+          "type": "string"
+        },
+        "paragraphs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Paragraph"
+          },
+          "description": "The clause body as ordered paragraphs (the 第N条 content). Each renders with a derived \"1 / 2 / 3\" number."
+        },
+        "appliesTo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BaseRef"
+          }
+        },
+        "survivesTermination": {
+          "type": "boolean"
+        },
+        "survivalDuration": {
+          "type": "string",
+          "description": "ISO 8601 duration."
+        },
+        "standardClauseRef": {
+          "$ref": "#/$defs/BaseRef"
+        },
+        "isCustomized": {
+          "type": "boolean"
+        },
+        "negotiationStatus": {
+          "type": "string",
+          "enum": [
+            "agreed",
+            "proposed",
+            "counter-proposed",
+            "rejected",
+            "pending-review",
+            "deal-breaker"
+          ]
+        },
+        "jpLegalBasis": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JPLegalBasisEnum"
+          }
+        },
+        "usLegalBasis": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/USLegalBasisEnum"
+          }
+        },
+        "riskLevel": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "containsObligations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BaseRef"
+          }
+        }
+      },
+      "required": [
+        "clauseType"
+      ],
+      "$ref": "#/$defs/SemanticBlock"
+    },
+    "ClauseTypeEnum": {
+      "type": "string",
+      "description": "Standard taxonomy of contract clause categories.",
+      "enum": [
+        "recital",
+        "definition",
+        "scope-of-work",
+        "deliverable",
+        "acceptance-criteria",
+        "payment-terms",
+        "consideration",
+        "fees",
+        "expenses",
+        "taxes",
+        "term-duration",
+        "effective-date",
+        "commencement",
+        "renewal",
+        "termination-for-cause",
+        "termination-for-convenience",
+        "termination-notice",
+        "cure-period",
+        "survival",
+        "confidentiality",
+        "non-disclosure",
+        "non-compete",
+        "non-solicitation",
+        "non-circumvention",
+        "intellectual-property",
+        "license-grant",
+        "ownership",
+        "work-for-hire",
+        "moral-rights",
+        "background-ip",
+        "foreground-ip",
+        "warranty",
+        "representation",
+        "covenant",
+        "disclaimer",
+        "indemnification",
+        "limitation-of-liability",
+        "exclusion-of-damages",
+        "consequential-damages-waiver",
+        "insurance",
+        "force-majeure",
+        "governing-law",
+        "jurisdiction",
+        "venue",
+        "choice-of-forum",
+        "dispute-resolution",
+        "arbitration",
+        "mediation",
+        "negotiation-cooling-off",
+        "notices",
+        "assignment",
+        "delegation",
+        "subcontracting",
+        "amendment",
+        "modification",
+        "severability",
+        "entire-agreement",
+        "merger-integration",
+        "counterparts",
+        "electronic-signatures",
+        "data-protection",
+        "data-processing",
+        "cross-border-data-transfer",
+        "compliance",
+        "audit-rights",
+        "books-and-records",
+        "anti-bribery",
+        "anti-corruption",
+        "export-control",
+        "sanctions",
+        "tax-allocation",
+        "tax-gross-up",
+        "currency",
+        "interest-late-fees",
+        "set-off",
+        "escrow",
+        "service-level",
+        "performance-metrics",
+        "kpi",
+        "change-management",
+        "change-order",
+        "personnel",
+        "key-personnel",
+        "training",
+        "support-maintenance",
+        "publicity",
+        "marketing-rights",
+        "third-party-beneficiaries",
+        "no-third-party-beneficiaries",
+        "waiver",
+        "no-waiver",
+        "headings-construction",
+        "interpretation",
+        "language",
+        "execution",
+        "further-assurances",
+        "relationship-of-parties",
+        "independent-contractor-status",
+        "no-agency",
+        "no-partnership",
+        "miscellaneous",
+        "boilerplate",
+        "jp-shitauke-protection",
+        "jp-antitrust-compliance",
+        "us-state-law-specific",
+        "custom",
+        "injunctive-relief"
+      ]
+    },
+    "ConsentToESign": {
+      "type": "object",
+      "description": "Explicit e-signature consent. Required under US ESIGN §101(c), UETA §5; expected under JP 電子署名法.",
+      "properties": {
+        "consented": {
+          "type": "boolean"
+        },
+        "consentedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "consentText": {
+          "type": "string"
+        },
+        "consentTextLocale": {
+          "type": "string"
+        },
+        "withdrawalRights": {
+          "type": "string",
+          "description": "ESIGN §101(c)(1)(B)."
+        },
+        "hardwareSoftwareRequirements": {
+          "type": "string",
+          "description": "ESIGN §101(c)(1)(C)(iii)."
+        },
+        "demonstratedAbility": {
+          "type": "boolean",
+          "description": "ESIGN §101(c)(1)(C)(ii)."
+        },
+        "regulatoryFramework": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "US-ESIGN",
+              "US-UETA",
+              "US-UCC",
+              "JP-Denshi-Shomei-Hou",
+              "EU-eIDAS",
+              "other"
+            ]
+          }
+        }
+      },
+      "required": [
+        "consented",
+        "consentedAt"
+      ]
+    },
+    "JPLegalBasisEnum": {
+      "type": "string",
+      "description": "Japanese statutory basis classification.",
+      "enum": [
+        "minpou",
+        "shouhou",
+        "kaisha-hou",
+        "roudou-kijun-hou",
+        "roudou-keiyaku-hou",
+        "haken-hou",
+        "shitauke-hou",
+        "dokusen-kinshi-hou",
+        "fusei-kyousou-boushi-hou",
+        "kojin-jouhou-hogo-hou",
+        "denshi-shomei-hou",
+        "tokutei-shoutorihiki-hou",
+        "shouhisha-keiyaku-hou",
+        "kokusai-butsuhin-baibai-hou-cisg"
+      ]
+    },
+    "JurisdictionEnum": {
+      "type": "string",
+      "description": "ISO 3166-1 alpha-2 country code, optionally with subdivision (e.g., 'US-CA', 'US-NY', 'US-DE', 'JP-13' for Tokyo).",
+      "pattern": "^[A-Z]{2}(-[A-Z0-9]{1,3})?$"
+    },
+    "Notarization": {
+      "type": "object",
+      "description": "Notarial attestation. Covers traditional and remote online notarization (RON).",
+      "properties": {
+        "notary": {
+          "$ref": "#/$defs/ActorObject"
+        },
+        "notaryCommissionId": {
+          "type": "string"
+        },
+        "notaryJurisdiction": {
+          "$ref": "#/$defs/JurisdictionEnum"
+        },
+        "notaryType": {
+          "type": "string",
+          "enum": [
+            "traditional-in-person",
+            "remote-online-ron",
+            "apostille",
+            "jp-koshou-nin"
+          ]
+        },
+        "notarizedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notarySignature": {
+          "$ref": "#/$defs/BlockSignature"
+        },
+        "notarialActType": {
+          "type": "string",
+          "enum": [
+            "acknowledgment",
+            "jurat",
+            "oath",
+            "copy-certification",
+            "signature-witness"
+          ]
+        },
+        "sealImage": {
+          "$ref": "#/$defs/ExternalPayload"
+        },
+        "ronSessionRecording": {
+          "$ref": "#/$defs/ExternalPayload"
+        },
+        "apostilleNumber": {
+          "type": "string",
+          "description": "Hague Apostille for cross-border use."
+        }
+      }
+    },
+    "Paragraph": {
+      "type": "object",
+      "description": "A numbered paragraph inside a clause (the \"1 / 2 / 3\" level). Its ordinal is derived at render from position in Clause.paragraphs; not stored.",
+      "properties": {
+        "$tag": {
+          "const": "Paragraph"
+        },
+        "paragraphText": {
+          "type": "string",
+          "description": "The paragraph prose. May contain {{token}} references to sibling properties (see document_render_model.md P3)."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SubItem"
+          },
+          "description": "Optional \"(1) (2) (3)\" sub-items."
+        }
+      },
+      "required": [
+        "paragraphText"
+      ]
+    },
+    "ContractParty": {
+      "type": "object",
+      "description": "A party to the contract. Extends GV Entity with contract-specific role and identity.",
+      "properties": {
+        "$tag": {
+          "const": "Party"
+        },
+        "partyRole": {
+          "$ref": "#/$defs/PartyRoleEnum"
+        },
+        "partyType": {
+          "$ref": "#/$defs/PartyTypeEnum"
+        },
+        "legalName": {
+          "type": "string"
+        },
+        "tradeName": {
+          "type": "string"
+        },
+        "legalNameLocal": {
+          "type": "string",
+          "description": "Name in local script (e.g., 株式会社○○)."
+        },
+        "legalNameKana": {
+          "type": "string",
+          "description": "Furigana reading of the legal name (法人名フリガナ)."
+        },
+        "jurisdictionOfIncorporation": {
+          "$ref": "#/$defs/JurisdictionEnum"
+        },
+        "corporateNumber": {
+          "type": "string",
+          "pattern": "^[0-9]{13}$",
+          "description": "Japanese corporate number (法人番号, 13 digits). Form-facing flat twin of identifiers[type=jp-corporate-number]."
+        },
+        "registeredOffice": {
+          "$ref": "#/$defs/PartyAddress"
+        },
+        "branchName": {
+          "type": "string",
+          "description": "Branch / office executing the contract (支店・営業所名)."
+        },
+        "noticeAddress": {
+          "$ref": "#/$defs/PartyAddress"
+        },
+        "billingAddress": {
+          "$ref": "#/$defs/PartyAddress"
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PartyIdentifier"
+          }
+        },
+        "primaryContact": {
+          "$ref": "#/$defs/PartyContact"
+        },
+        "legalContact": {
+          "$ref": "#/$defs/PartyContact"
+        },
+        "billingContact": {
+          "$ref": "#/$defs/PartyContact"
+        },
+        "signatoryRef": {
+          "$ref": "#/$defs/BaseRef"
+        },
+        "signatoryName": {
+          "type": "string",
+          "description": "Signatory's name (署名者氏名／代表者氏名)."
+        },
+        "signatoryNameLocal": {
+          "type": "string",
+          "description": "Signatory's name in local script (署名者氏名・現地語)."
+        },
+        "signatoryTitle": {
+          "type": "string",
+          "description": "Signatory's title (署名者役職名). e.g., 'CEO', '代表取締役'."
+        },
+        "signatoryEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Signatory's e-mail — e-signature routing destination (署名者メールアドレス)."
+        },
+        "signingDepartment": {
+          "type": "string",
+          "description": "Department executing the contract (契約締結部署名／主管部課)."
+        },
+        "signingDepartmentLocal": {
+          "type": "string",
+          "description": "Department name in local script (部署名・現地語)."
+        },
+        "sealType": {
+          "type": "string",
+          "enum": [
+            "electronic-signature",
+            "jitsuin",
+            "kakuin",
+            "mitomein",
+            "ginkoin",
+            "sign-only",
+            "other"
+          ],
+          "description": "Seal / signing method declared for this party (押印・電子署名タイプ).",
+          "x-a2-enum-descriptions": {
+            "electronic-signature": "電子署名",
+            "jitsuin": "実印（代表者印・登録印）",
+            "kakuin": "角印（社印）",
+            "mitomein": "認印",
+            "ginkoin": "銀行印",
+            "sign-only": "署名のみ（記名押印なし）",
+            "other": "その他"
+          }
+        },
+        "capacityAttestation": {
+          "type": "string",
+          "description": "Statement of authority to bind."
+        },
+        "sanctionsScreening": {
+          "type": "object",
+          "properties": {
+            "screenedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "lists": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "OFAC-SDN",
+                  "OFAC-non-SDN",
+                  "EU-consolidated",
+                  "UN-consolidated",
+                  "UK-HMT",
+                  "JP-METI",
+                  "other"
+                ]
+              }
+            },
+            "result": {
+              "type": "string",
+              "enum": [
+                "clear",
+                "match",
+                "potential-match",
+                "not-screened"
+              ]
+            },
+            "evidence": {
+              "$ref": "#/$defs/BaseRef"
+            }
+          }
+        }
+      },
+      "required": [
+        "partyRole",
+        "legalName"
+      ],
+      "$ref": "#/$defs/Entity"
+    },
+    "PartyAddress": {
+      "type": "object",
+      "description": "Postal address. Used for notices, service of process, and registered office.",
+      "properties": {
+        "addressLine1": {
+          "type": "string"
+        },
+        "addressLine2": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "stateRegion": {
+          "type": "string",
+          "description": "State (US), Prefecture (JP, e.g., '東京都')."
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "ZIP (US) or 郵便番号 (JP)."
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2."
+        },
+        "attentionTo": {
+          "type": "string"
+        },
+        "jpAddressFormatted": {
+          "type": "string",
+          "description": "Full address in Japanese format (都道府県市区町村番地建物名)."
+        }
+      },
+      "required": []
+    },
+    "PartyContact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "department": {
+          "type": "string",
+          "description": "Contact's department (部署名)."
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string",
+          "description": "BCP-47 language tag."
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "PartyIdentifier": {
+      "type": "object",
+      "description": "Government-issued or registry identifier for a party.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "jp-corporate-number",
+            "jp-mynumber-individual",
+            "jp-shouji-touki-bangou",
+            "us-ein",
+            "us-ssn-last4",
+            "us-state-entity-id",
+            "duns",
+            "lei",
+            "vat-eu",
+            "iso-6523",
+            "passport",
+            "drivers-license",
+            "other"
+          ]
+        },
+        "value": {
+          "type": "string"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "issuedDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "expiresOn": {
+          "type": "string",
+          "format": "date"
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verifiedBy": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "PartyRoleEnum": {
+      "type": "string",
+      "description": "Role a party plays in a contract. Domain specialization of GV ActorRoleEnum.",
+      "enum": [
+        "disclosing",
+        "receiving",
+        "mutual",
+        "buyer",
+        "seller",
+        "supplier",
+        "customer",
+        "vendor",
+        "licensor",
+        "licensee",
+        "lessor",
+        "lessee",
+        "landlord",
+        "tenant",
+        "employer",
+        "employee",
+        "contractor",
+        "subcontractor",
+        "client",
+        "service-provider",
+        "service-recipient",
+        "principal",
+        "agent",
+        "broker",
+        "guarantor",
+        "guaranteed-party",
+        "surety",
+        "assignor",
+        "assignee",
+        "transferor",
+        "transferee",
+        "indemnifying-party",
+        "indemnified-party",
+        "trustor",
+        "trustee",
+        "beneficiary",
+        "borrower",
+        "lender",
+        "investor",
+        "issuer-securities",
+        "witness",
+        "notary",
+        "third-party-beneficiary",
+        "obligor",
+        "obligee"
+      ]
+    },
+    "PartySignatureStateEnum": {
+      "type": "string",
+      "enum": [
+        "invited",
+        "viewed",
+        "in-progress",
+        "signed",
+        "declined",
+        "delegated",
+        "revoked",
+        "expired"
+      ]
+    },
+    "PartyTypeEnum": {
+      "type": "string",
+      "description": "Legal form of party. Includes Japanese corporate forms (株式会社, 合同会社, 合資会社, 合名会社, 一般社団法人, 公益社団法人) and US forms (C-Corp, S-Corp, LLC, LP, LLP).",
+      "enum": [
+        "individual",
+        "corporation",
+        "kabushiki-kaisha",
+        "godo-kaisha",
+        "goshi-kaisha",
+        "llc",
+        "lp",
+        "llp",
+        "c-corp",
+        "s-corp",
+        "partnership",
+        "sole-proprietorship",
+        "government-entity",
+        "non-profit",
+        "ippan-shadan-houjin",
+        "koueki-shadan-houjin",
+        "trust",
+        "estate",
+        "joint-venture",
+        "branch-office",
+        "representative-office",
+        "other",
+        "university"
+      ]
+    },
+    "RedlineAction": {
+      "type": "object",
+      "description": "Structured redline change during negotiation.",
+      "properties": {
+        "$tag": {
+          "const": "Redline"
+        },
+        "redlineId": {
+          "type": "string"
+        },
+        "targetRef": {
+          "$ref": "#/$defs/BaseRef"
+        },
+        "action": {
+          "$ref": "#/$defs/RedlineActionEnum"
+        },
+        "originalText": {
+          "type": "string"
+        },
+        "proposedText": {
+          "type": "string"
+        },
+        "proposedBy": {
+          "$ref": "#/$defs/ActorObject"
+        },
+        "proposedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "accepted",
+            "rejected",
+            "counter-proposed",
+            "withdrawn"
+          ]
+        },
+        "respondedBy": {
+          "$ref": "#/$defs/ActorObject"
+        },
+        "respondedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "respondedRationale": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "redlineId",
+        "targetRef",
+        "action"
+      ],
+      "$ref": "#/$defs/Entity"
+    },
+    "RedlineActionEnum": {
+      "type": "string",
+      "enum": [
+        "insert",
+        "delete",
+        "replace",
+        "comment-only",
+        "accept",
+        "reject",
+        "propose-alternative"
+      ]
+    },
+    "SignatoryBlock": {
+      "type": "object",
+      "description": "Complete signature record for one party. Wraps GV BlockSignature with party reference, capacity, and ceremony evidence.",
+      "properties": {
+        "$tag": {
+          "const": "SignatoryBlock"
+        },
+        "partyRef": {
+          "$ref": "#/$defs/BaseRef"
+        },
+        "signatory": {
+          "$ref": "#/$defs/ActorObject"
+        },
+        "signatoryTitle": {
+          "type": "string",
+          "description": "e.g., 'CEO', '代表取締役'."
+        },
+        "capacityToBind": {
+          "type": "string",
+          "description": "e.g., 'as duly authorized officer', 'pursuant to board resolution of YYYY-MM-DD'."
+        },
+        "signature": {
+          "$ref": "#/$defs/BlockSignature"
+        },
+        "signedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "$ref": "#/$defs/PartySignatureStateEnum"
+        },
+        "ceremonyEvidence": {
+          "$ref": "#/$defs/SigningCeremonyEvidence"
+        },
+        "consentToESign": {
+          "$ref": "#/$defs/ConsentToESign"
+        },
+        "witness": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Witness"
+          }
+        },
+        "notarization": {
+          "$ref": "#/$defs/Notarization"
+        },
+        "declineReason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "partyRef",
+        "state"
+      ],
+      "$ref": "#/$defs/Entity"
+    },
+    "SigningCeremonyEvidence": {
+      "type": "object",
+      "description": "Evidence captured during the signing ceremony. Required for high-value contracts and disputes.",
+      "properties": {
+        "ipAddress": {
+          "type": "string"
+        },
+        "ipGeolocation": {
+          "type": "string"
+        },
+        "userAgent": {
+          "type": "string"
+        },
+        "deviceFingerprint": {
+          "type": "string"
+        },
+        "browserLanguage": {
+          "type": "string"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "viewedFullDocument": {
+          "type": "boolean"
+        },
+        "viewDurationSeconds": {
+          "type": "integer"
+        },
+        "scrollCompletion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "biometric": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "face",
+                "fingerprint",
+                "voice",
+                "handwritten-signatures",
+                "iris",
+                "none"
+              ]
+            },
+            "captureRef": {
+              "$ref": "#/$defs/BaseRef"
+            },
+            "verificationConfidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "twoFactorAuth": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "sms-otp",
+                "email-otp",
+                "totp",
+                "push",
+                "webauthn",
+                "passkey",
+                "none"
+              ]
+            },
+            "verified": {
+              "type": "boolean"
+            },
+            "verifiedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "identityVerification": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "government-id-scan",
+                "knowledge-based",
+                "video-verification",
+                "in-person",
+                "jp-mynumber-card",
+                "us-state-id",
+                "none"
+              ]
+            },
+            "provider": {
+              "type": "string",
+              "description": "e.g., 'Onfido', 'Jumio', 'TRUSTDOCK', 'ID.me'."
+            },
+            "result": {
+              "type": "string",
+              "enum": [
+                "pass",
+                "fail",
+                "review",
+                "not-attempted"
+              ]
+            },
+            "verifiedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "evidenceRef": {
+              "$ref": "#/$defs/BaseRef"
+            }
+          }
+        }
+      }
+    },
+    "SubItem": {
+      "type": "object",
+      "description": "A \"(1) (2) (3)\" sub-item inside a paragraph. Ordinal derived at render from position in Paragraph.items; not stored.",
+      "properties": {
+        "$tag": {
+          "const": "SubItem"
+        },
+        "itemText": {
+          "type": "string",
+          "description": "The sub-item prose. May contain {{token}} references to sibling properties."
+        }
+      },
+      "required": []
+    },
+    "USESIGNCompliance": {
+      "type": "object",
+      "description": "ESIGN Act §101(c) consumer disclosure compliance.",
+      "properties": {
+        "consumerContract": {
+          "type": "boolean"
+        },
+        "consumerConsent": {
+          "type": "boolean"
+        },
+        "consentToElectronicRecords": {
+          "$ref": "#/$defs/ConsentToESign"
+        },
+        "hardwareSoftwareDisclosure": {
+          "type": "string"
+        },
+        "withdrawalRightsDisclosure": {
+          "type": "string"
+        },
+        "electronicRecordsRetention": {
+          "type": "boolean"
+        },
+        "uetaState": {
+          "type": "boolean",
+          "description": "Whether the state has adopted UETA (49 states + DC)."
+        }
+      }
+    },
+    "USLegalBasisEnum": {
+      "type": "string",
+      "description": "US legal basis classification.",
+      "enum": [
+        "ucc-article-1",
+        "ucc-article-2-sales",
+        "ucc-article-2a-leases",
+        "ucc-article-9-secured",
+        "common-law-contract",
+        "restatement-second-contracts",
+        "esign-act",
+        "uets",
+        "ueta",
+        "hipaa",
+        "gramm-leach-bliley",
+        "ccpa",
+        "cpra",
+        "fcpa",
+        "ofac-sanctions",
+        "ear-export-administration",
+        "itar",
+        "ada",
+        "title-vii",
+        "sherman-act",
+        "clayton-act",
+        "ftc-act",
+        "lanham-act",
+        "copyright-act",
+        "patent-act",
+        "dtsa-defend-trade-secrets",
+        "cisg"
+      ]
+    },
+    "Witness": {
+      "type": "object",
+      "description": "Witness to a signature.",
+      "properties": {
+        "witness": {
+          "$ref": "#/$defs/ActorObject"
+        },
+        "witnessSignature": {
+          "$ref": "#/$defs/BlockSignature"
+        },
+        "witnessedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "relationship": {
+          "type": "string"
+        },
+        "attestation": {
+          "type": "string"
+        }
+      }
+    },
+    "ContractSigningCeremony": {
+      "type": "object",
+      "$comment": "§8. Contract signing ceremony — extends SigningCeremony.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/SigningCeremony"
+        }
+      ],
+      "properties": {
+        "$tag": {
+          "const": "ContractSigningCeremony"
+        },
+        "contractId": {
+          "type": "string"
+        },
+        "jurisdiction": {
+          "type": "string"
+        },
+        "applicableLaw": {
+          "type": "string",
+          "enum": [
+            "US ESIGN",
+            "JP 電子署名法",
+            "EU eIDAS",
+            "UNCITRAL"
+          ]
+        },
+        "esIgnConsent": {
+          "$ref": "#/$defs/ConsentToESign"
+        }
+      }
+    },
+    "HandwrittenContractSignature": {
+      "type": "object",
+      "$comment": "§8. Contract wrapper around HandwrittenSignature.",
+      "properties": {
+        "$tag": {
+          "const": "HandwrittenContractSignature"
+        },
+        "handwriting": {
+          "$ref": "#/$defs/HandwrittenSignature"
+        },
+        "clauseId": {
+          "type": "string"
+        },
+        "agreementText": {
+          "type": "string"
+        }
+      }
+    },
+    "_____S9_FUTURE_DOC_TYPES_____": {
+      "description": "─── §9 Reserved for future modules (Medical, Robot, Life …) ───",
+      "x-a2-section": true
+    }
+  },
+  "x-a2-input": {
+    "BaseRef": {
+      "$value": "entry",
+      "src": "pro",
+      "ruleID": "pro",
+      "type": "pro"
+    },
+    "sLogicRef": {
+      "src": "pro",
+      "ruleID": "pro"
+    },
+    "ActorObject": {
+      "id": "system",
+      "role": "pro",
+      "at": "pro",
+      "signatureRef": "system",
+      "displayName": "entry",
+      "lang": "pro"
+    },
+    "Value": {
+      "$value": "entry",
+      "key": "entry",
+      "id": "system",
+      "type": "pro",
+      "unit": "entry",
+      "semantic": "pro",
+      "semanticUnit": "pro",
+      "observedAt": "pro",
+      "recordedAt": "system",
+      "validFrom": "pro",
+      "validTo": "pro",
+      "freshnessTTL": "pro",
+      "supersededBy": "system",
+      "confidence": "system",
+      "quality": "pro",
+      "currency": "entry",
+      "display": "pro",
+      "voiceAlias": "pro",
+      "prompt": "pro",
+      "slot": "pro",
+      "stat": "pro",
+      "lowerLimit": "pro",
+      "upperLimit": "pro",
+      "required": "pro",
+      "pattern": "pro",
+      "desc": "pro",
+      "dbType": "pro",
+      "lang": "pro",
+      "dir": "pro",
+      "nil": "pro",
+      "nullFlavor": "pro",
+      "comparator": "pro",
+      "precision": "pro",
+      "decimals": "pro",
+      "scale": "pro",
+      "uncertainty": "pro",
+      "unitSystem": "pro",
+      "source": "pro",
+      "derivedFrom": "system",
+      "attributedTo": "system",
+      "classification": "pro",
+      "pii": "pro",
+      "code": "pro",
+      "codeSystem": "pro",
+      "codeSystemVersion": "pro",
+      "mimeType": "pro",
+      "encoding": "pro",
+      "format": "pro",
+      "version": "system",
+      "revision": "system",
+      "rule": "pro",
+      "$signature": "system",
+      "$hashChain": "system",
+      "groundingNote": "entry"
+    },
+    "ValueDesc": {
+      "value": "entry",
+      "description": "entry"
+    },
+    "Ref": {
+      "$value": "entry",
+      "id": "system",
+      "from": "system",
+      "to": "system",
+      "display": "pro",
+      "rel": "pro",
+      "subClass": "pro",
+      "metaClass": "pro",
+      "disOrder": "pro",
+      "calOrder": "pro",
+      "procOrder": "pro",
+      "weight": "pro",
+      "observedAt": "pro",
+      "recordedAt": "system",
+      "validFrom": "pro",
+      "validTo": "pro",
+      "freshnessTTL": "pro",
+      "supersededBy": "system",
+      "source": "pro",
+      "derivedFrom": "system",
+      "attributedTo": "system",
+      "confidence": "system",
+      "quality": "pro",
+      "classification": "pro",
+      "pii": "pro",
+      "$signature": "system"
+    },
+    "ValueBlock": {
+      "name": "entry",
+      "id": "system",
+      "type": "pro",
+      "subtype": "pro",
+      "version": "system",
+      "revision": "system",
+      "observedAt": "pro",
+      "recordedAt": "system",
+      "validFrom": "pro",
+      "validTo": "pro",
+      "freshnessTTL": "pro",
+      "supersededBy": "system",
+      "source": "pro",
+      "derivedFrom": "system",
+      "attributedTo": "system",
+      "lang": "pro",
+      "classification": "pro",
+      "pii": "pro",
+      "confidence": "system",
+      "quality": "pro",
+      "code": "pro",
+      "codeSystem": "pro",
+      "codeSystemVersion": "pro",
+      "rule": "pro",
+      "children": "pro",
+      "$signature": "system",
+      "$hashChain": "system"
+    },
+    "SemanticBlock": {
+      "id": "system",
+      "title": "entry",
+      "type": "pro",
+      "subtype": "pro",
+      "version": "system",
+      "revision": "system",
+      "validFrom": "pro",
+      "validTo": "pro",
+      "source": "pro",
+      "derivedFrom": "system",
+      "attributedTo": "system",
+      "lang": "pro",
+      "classification": "pro",
+      "pii": "pro",
+      "confidence": "system",
+      "quality": "pro",
+      "rule": "pro",
+      "content": "entry",
+      "$signature": "system",
+      "$hashChain": "system"
+    },
+    "Log": {
+      "id": "system",
+      "type": "pro",
+      "subtype": "pro",
+      "version": "system",
+      "revision": "system",
+      "timestamp": "pro",
+      "observedAt": "pro",
+      "recordedAt": "system",
+      "validFrom": "pro",
+      "validTo": "pro",
+      "freshnessTTL": "pro",
+      "supersededBy": "system",
+      "tsFormat": "pro",
+      "source": "pro",
+      "derivedFrom": "system",
+      "attributedTo": "system",
+      "lang": "pro",
+      "classification": "pro",
+      "pii": "pro",
+      "confidence": "system",
+      "quality": "pro",
+      "code": "pro",
+      "codeSystem": "pro",
+      "codeSystemVersion": "pro",
+      "children": "pro",
+      "$signature": "system",
+      "$hashChain": "system",
+      "rule": "pro"
+    },
+    "Entity": {
+      "id": "system",
+      "alias": "entry",
+      "timestamp": "pro",
+      "validFrom": "pro",
+      "validTo": "pro",
+      "tsFormat": "pro",
+      "observedAt": "pro",
+      "recordedAt": "system",
+      "freshnessTTL": "pro",
+      "supersededBy": "system",
+      "source": "pro",
+      "derivedFrom": "system",
+      "attributedTo": "system",
+      "type": "pro",
+      "subtype": "pro",
+      "version": "system",
+      "revision": "system",
+      "lang": "pro",
+      "classification": "pro",
+      "pii": "pro",
+      "confidence": "system",
+      "quality": "pro",
+      "code": "pro",
+      "codeSystem": "pro",
+      "codeSystemVersion": "pro",
+      "industry": "pro",
+      "usecase": "pro",
+      "protechfun": "pro",
+      "rule": "pro",
+      "children": "pro",
+      "$signature": "system",
+      "$hashChain": "system",
+      "domain": "pro",
+      "groundingNote": "entry"
+    },
+    "Signature": {
+      "id": "system",
+      "alg": "system",
+      "signedAt": "system",
+      "signedBy": "system",
+      "keyId": "system",
+      "canonicalization": "system",
+      "profile": "system",
+      "payload": "system"
+    },
+    "HashChain": {
+      "id": "system",
+      "Namespace": "system",
+      "DocumentID": "system",
+      "Version": "system",
+      "LatestChainHash": "system",
+      "XmlSignature": "system",
+      "SignedBy": "system",
+      "SignedAt": "system",
+      "Algorithm": "system",
+      "ServiceEndpoint": "system"
+    },
+    "ExternalPayload": {
+      "$value": "entry",
+      "mimeType": "pro",
+      "encoding": "pro",
+      "reason": "pro"
+    },
+    "JWSProtectedHeaderDecoded": {
+      "alg": "system",
+      "kid": "system",
+      "typ": "system",
+      "cty": "system",
+      "b64": "system",
+      "crit": "system",
+      "sigT": "system",
+      "iat": "system",
+      "x5c": "system",
+      "x5t#S256": "system",
+      "x5u": "system",
+      "jku": "system"
+    },
+    "JAdESSigTst": {
+      "sigTst": "system"
+    },
+    "JAdESXVals": {
+      "xVals": "system"
+    },
+    "JAdESRVals": {
+      "rVals": "system"
+    },
+    "JAdESTstVD": {
+      "tstVD": "system"
+    },
+    "BlockSignature": {
+      "protected": "system",
+      "_protectedDecoded": "system",
+      "header": "system",
+      "payload": "system",
+      "signature": "system",
+      "jadesProfile": "system",
+      "canonicalization": "system",
+      "signingTarget": "system",
+      "signedProperties": "system"
+    },
+    "BlockHashChain": {
+      "blockId": "system",
+      "blockHash": "system",
+      "prevHash": "system",
+      "docChainRef": "system",
+      "seqNo": "system",
+      "algorithm": "system",
+      "linkedAt": "system",
+      "serviceRef": "system",
+      "chainSignature": "system"
+    },
+    "Header": {
+      "groundingPolicy": "pro",
+      "docId": "system",
+      "schemaVersion": "system",
+      "organization": "entry",
+      "version": "system",
+      "actors": "pro",
+      "sLogicRefs": "system",
+      "semanticRefs": "system",
+      "contextRefs": "system",
+      "sourceRefs": "system",
+      "context": "entry",
+      "hashChain": "system",
+      "mldsaKeys": "system",
+      "chainPolicy": "system"
+    },
+    "Root": {
+      "$schema": "pro",
+      "id": "system",
+      "type": "pro",
+      "subtype": "pro",
+      "version": "system",
+      "revision": "system",
+      "timestamp": "pro",
+      "validFrom": "pro",
+      "validTo": "pro",
+      "observedAt": "pro",
+      "recordedAt": "system",
+      "source": "pro",
+      "derivedFrom": "system",
+      "attributedTo": "system",
+      "lang": "pro",
+      "classification": "pro",
+      "pii": "pro",
+      "confidence": "system",
+      "quality": "pro",
+      "industry": "pro",
+      "usecase": "pro",
+      "protechfun": "pro",
+      "header": "system",
+      "nodes": "system",
+      "$signature": "system"
+    },
+    "Instruction": {
+      "id": "system",
+      "type": "pro",
+      "priority": "pro",
+      "issuedBy": "pro",
+      "issuedAt": "pro",
+      "validFrom": "pro",
+      "validTo": "pro",
+      "freshnessTTL": "pro",
+      "approvedBy": "pro",
+      "approvedAt": "system",
+      "groundingPolicy": "pro",
+      "confidence": "system",
+      "classification": "pro",
+      "rule": "pro",
+      "source": "pro",
+      "version": "system",
+      "revision": "system",
+      "children": "pro",
+      "$signature": "system"
+    },
+    "AIAction": {
+      "id": "system",
+      "agentId": "system",
+      "modelVersion": "pro",
+      "actionType": "pro",
+      "instructionRef": "system",
+      "groundingRefs": "system",
+      "inferenceAt": "system",
+      "executedAt": "system",
+      "completedAt": "system",
+      "confidence": "system",
+      "groundingPolicy": "pro",
+      "outcome": "pro",
+      "failureReason": "pro",
+      "humanOverride": "pro",
+      "humanOverrideBy": "pro",
+      "humanOverrideAt": "system",
+      "sessionRef": "system",
+      "rule": "pro",
+      "classification": "pro",
+      "source": "pro",
+      "version": "system",
+      "revision": "system",
+      "children": "pro",
+      "$signature": "system",
+      "$hashChain": "system"
+    },
+    "AuditSession": {
+      "id": "system",
+      "sessionType": "pro",
+      "agentId": "system",
+      "subjectId": "system",
+      "startedAt": "pro",
+      "endedAt": "pro",
+      "prevSessionId": "system",
+      "status": "pro",
+      "groundingPolicy": "pro",
+      "confidence": "system",
+      "classification": "pro",
+      "rule": "pro",
+      "source": "pro",
+      "version": "system",
+      "revision": "system",
+      "children": "pro",
+      "$hashChain": "system"
+    }
+  }
+}

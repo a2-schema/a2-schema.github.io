@@ -58,33 +58,59 @@ a2-schema follows a **Single Source of Truth** architecture — every def is def
 exactly once, in the Grand Vault. Everything else references it.
 
 ```
-Grand Vault (SSoT)        all def definitions (§1–§9)
+Grand Vault (SSoT)        all def definitions (§1–§10)
    ↓ $ref only
-Profiles                  Signature, Contract, … (pure $ref aggregators)
+Profiles                  Signature, Contract, Compliance, … (pure $ref aggregators)
    ↓ aggregate
-Tier Configs              a2-sign, a2-doc, … (per-App def selection)
+Tier Configs              a2-sign, a2-doc, a2-compliance, … (per-App def selection)
    ↓ filter
-Applications              a2-Sign App, a2-Doc App, …
+Applications              a2-Sign App, a2-Doc App, a2-Compliance App, …
 ```
 
 Dependency is strictly one-way (Profiles/Tiers → Grand Vault); the Vault references
-nothing outside itself. New document types are added by extending a Vault section and
-adding a profile — never by duplicating defs.
+nothing outside itself (only **local** `#/$defs` refs). New document types are added by
+extending a Vault section and adding a profile — never by duplicating defs.
+
+### Versioning & URLs
+
+Each artifact is **immutable per version** and served at a URL whose path mirrors its
+`$id`, so every `$id`/`$ref` resolves directly:
+
+- Vault: `https://a2-schema.org/vault/v0.0.9/schema.json`
+- Profile: `https://a2-schema.org/profiles/<name>/<ver>/schema.json`
+- Tier config: `https://a2-schema.org/tier-configs/<tier>/<ver>/config.json` (a build manifest, **not** an instance schema; described by the [tier-config meta-schema](tier-config/v0.1.0/schema.json))
+- **`latest` alias** (e.g. `…/vault/latest/schema.json`) mirrors the newest version for humans/tools; profiles and tiers always pin an **exact** version in their `$ref`s.
 
 ## Schemas
 
 | Type | Schema | Version | Role |
 |---|---|---|---|
-| **SSoT** | [Grand Vault](schemas/a2-grand-vault-v00.00.08.json) | v0.0.8 | All def definitions (§1–§9): Common, HashChain, AI Audit, Signature, Biometric, SigningCeremony, Document, Contract |
-| Profile | [Signature](schemas/profiles/a2-signature-profile-v00.00.01.json) | v0.0.1 | Signature use cases (ML-DSA, RSA, JAdES, Handwritten ISO 19794-7) |
-| Profile | [Contract](schemas/profiles/a2-contract-profile-v00.01.07.json) | v0.1.7 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) |
+| **SSoT** | [Grand Vault](vault/v0.0.9/schema.json) | v0.0.9 | All def definitions (§1–§10): Common, HashChain, AI Audit, Signature, Biometric, SigningCeremony, Document, Contract, **Compliance** |
+| Profile | [Signature](profiles/signature/v0.0.2/schema.json) | v0.0.2 | Signature use cases (ML-DSA, RSA, JAdES, Handwritten ISO 19794-7) |
+| Profile | [Contract](profiles/contract/v0.1.8/schema.json) | v0.1.8 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) |
+| Profile | [Compliance](profiles/compliance/v0.0.1/schema.json) | v0.0.1 | **NEW** — Compliance aggregator (GDPR, EU AI Act, SOC 2, ISO 27001, …) |
+
+> Prior versions ([Grand Vault v0.0.8](vault/v0.0.8/schema.json), [Signature v0.0.1](profiles/signature/v0.0.1/schema.json), [Contract v0.1.7](profiles/contract/v0.1.7/schema.json)) remain published for `$ref` stability. v0.0.9 is **purely additive** over v0.0.8.
 
 ## Tier Configurations (App Profiles)
 
 | Tier | Version | Use Case |
 |---|---|---|
-| [a2-sign](schemas/tier-configs/a2-sign-v00.00.01.json) | v0.0.1 | Electronic signature application |
-| [a2-doc](schemas/tier-configs/a2-doc-v00.00.03.json) | v0.0.3 | General document processing |
+| [a2-sign](tier-configs/a2-sign/v0.0.2/config.json) | v0.0.2 | Electronic signature application |
+| [a2-doc](tier-configs/a2-doc/v0.0.4/config.json) | v0.0.4 | General document processing |
+| [a2-compliance](tier-configs/a2-compliance/v0.0.1/config.json) | v0.0.1 | **NEW** — Compliance management (automated evidence, audit trail) |
+
+## Compliance Frameworks Supported (§10)
+
+SOC 2 Type II · ISO 27001 / 27017 / 27018 · GDPR / CCPA / 個人情報保護法 · EU AI Act ·
+NIST AI RMF / 800-53 / CSF · HIPAA / PCI DSS · FedRAMP / FISC / 3省2ガイドライン ·
+ESG / TCFD / CSDDD / NIS2 · 電子帳簿保存法 / インボイス制度
+
+§10 defs: `ConsentReceipt` (Kantara Consent Receipt v1.1) · `ComplianceLog` ·
+`DataSubjectRequest` (GDPR Art 15-22 / RTBF) · `IncidentReport` (NIS2 24h / GDPR 72h) ·
+`AccessControlEvent` (SOC 2 CC6 / ISO 27001 A.9) · `PIIDetection` · `DataLineage` ·
+`GovernanceAttestation` (ESG/TCFD/CSDDD). §3 `AIAction` gains EU-AI-Act
+`riskLevel` / `explainability` / `humanOversight` / `dataLineage`.
 
 ### Scalability
 
@@ -147,10 +173,12 @@ More modules coming: Healthcare, Robotics, Life, KnowledgeOS.
 
 ## Roadmap
 
-- [x] Grand Vault SSoT v0.0.8 (§1–§9, 125 defs)
-- [x] Signature Profile v0.0.1 (incl. Handwritten ISO 19794-7)
-- [x] Contract Profile v0.1.7
-- [x] Tier Configs: a2-sign, a2-doc
+- [x] Grand Vault SSoT v0.0.8 (§1–§9)
+- [x] Grand Vault SSoT v0.0.9 (§1–§10, +Compliance — 120 defs)
+- [x] Signature Profile v0.0.2 (incl. Handwritten ISO 19794-7)
+- [x] Contract Profile v0.1.8
+- [x] Compliance Profile v0.0.1 (GDPR / EU AI Act / SOC 2 / ISO 27001 / HIPAA / PCI DSS)
+- [x] Tier Configs: a2-sign, a2-doc, a2-compliance
 - [ ] Healthcare Module
 - [ ] AI Agent Module
 - [ ] SDK (TypeScript, Rust, Python)

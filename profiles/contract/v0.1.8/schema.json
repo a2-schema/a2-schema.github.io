@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2-schema.org/profiles/contract/v0.1.8/schema.json",
+  "title": "Contract Profile v0.1.8",
+  "version": "0.1.8",
+  "description": "Profile selecting contract-related defs from Grand Vault v0.0.9. References Signature Profile + contract primitives. Adds ContractConsentReceipt (ESIGN disclosure).",
+  "license": "Apache-2.0",
+  "x-a2-role": "profile",
+  "x-a2-base-schema": "https://a2-schema.org/vault/v0.0.9/schema.json",
+  "x-a2-depends-on": [
+    "signature-profile-v0.0.2"
+  ],
+  "$defs": {
+    "ContractRoot": {
+      "type": "object",
+      "properties": {
+        "$tag": {
+          "const": "Contract"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "parties": {
+          "type": "array",
+          "items": {
+            "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/ContractParty"
+          }
+        },
+        "clauses": {
+          "type": "array",
+          "items": {
+            "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/ContractClause"
+          }
+        },
+        "signingCeremony": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/ContractSigningCeremony"
+        },
+        "$signature": {
+          "$ref": "https://a2-schema.org/profiles/signature/v0.0.2/schema.json#/$defs/SignatureNode"
+        },
+        "$hashChain": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/HashChain"
+        }
+      }
+    },
+    "ContractConsentReceipt": {
+      "$comment": "Contract-specific ConsentReceipt (ESIGN disclosure). Composes GV ConsentReceipt.",
+      "allOf": [
+        {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/ConsentReceipt"
+        }
+      ],
+      "properties": {
+        "contractId": {
+          "type": "string"
+        },
+        "esIgnDisclosure": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/ConsentToESign"
+        }
+      }
+    }
+  },
+  "x-a2-included-defs": [
+    "ContractParty",
+    "ContractClause",
+    "ConsentToESign",
+    "USESIGNCompliance",
+    "SignatoryBlock",
+    "SigningCeremonyEvidence",
+    "RedlineAction",
+    "RedlineActionEnum",
+    "PartySignatureStateEnum",
+    "ContractSigningCeremony",
+    "HandwrittenContractSignature",
+    "ConsentReceipt"
+  ]
+}

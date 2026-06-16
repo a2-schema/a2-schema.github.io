@@ -1,19 +1,20 @@
 {
-  "$schema": "https://a2-schema.org/tier-config/v0.1.0",
+  "$schema": "https://a2-schema.org/tier-config/v0.1.0/schema.json",
+  "$id": "https://a2-schema.org/tier-configs/a2-doc/v0.0.4/config.json",
   "kind": "tier-config",
   "tier": "a2-doc",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "x-strip-mode": "selection",
-  "description": "General-purpose document tier (not contract-specific). Updated for SSoT v0.0.8.",
+  "description": "General-purpose document tier (not contract-specific). Updated for SSoT v0.0.9 + ESIGN consent.",
   "imports": {
-    "main": "https://a2-schema.org/vault/v0.0.8/schema.json"
+    "main": "https://a2-schema.org/vault/v0.0.9/schema.json"
   },
   "profiles": [
-    "https://a2-schema.org/profiles/signature/v0.0.1/schema.json"
+    "https://a2-schema.org/profiles/signature/v0.0.2/schema.json"
   ],
   "baseSchemas": {
     "main": {
-      "schemaHash": "sha256:b0afc752b3b7ea2e6144001dd0e62336d371bf08c0410b76beaff0bab801bcb2",
+      "schemaHash": "sha256:60597de2054d3a31bb1d3c91aee0c87aad722e15a3a429c3b9420ecc26445a08",
       "lastSyncedAt": "2026-06-15T00:00:00Z"
     }
   },
@@ -40,6 +41,9 @@
       "selected": true
     },
     "ConfidenceType": {
+      "selected": true
+    },
+    "ConsentReceipt": {
       "selected": true
     },
     "CurrencyType": {

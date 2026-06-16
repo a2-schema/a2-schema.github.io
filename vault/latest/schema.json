@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a2-schema.org/vault/v0.0.8/schema.json",
-  "title": "Grand Vault v0.0.8 — Single Source of Truth",
-  "version": "0.0.8",
-  "description": "The complete, authoritative def repository for a2-schema. All other schemas $ref defs here. Sections §1–§9; scalable to 2500+ DocTypes.",
+  "$id": "https://a2-schema.org/vault/v0.0.9/schema.json",
+  "title": "Grand Vault v0.0.9 — SSoT with Compliance Extensions",
+  "version": "0.0.9",
+  "description": "SSoT with §10 Compliance extensions (GDPR / EU AI Act / SOC 2 / ISO 27001 / HIPAA / PCI DSS / ESG). Purely additive over v0.0.8. All other schemas $ref defs here. Sections §1–§10; scalable to 2500+ DocTypes.",
   "license": "Apache-2.0",
   "x-a2-role": "ssot",
   "x-a2-deprecation-policy": "Defs marked x-a2-deprecated remain available for 2 minor versions before removal.",
@@ -2959,6 +2959,32 @@
         "$signature": {
           "type": "object",
           "description": "a2-sign SDK: approvedBy が設定されている場合に必須付与。ML-DSA-65推奨。"
+        },
+        "issuerIalLevel": {
+          "$ref": "#/$defs/IALLevel",
+          "$comment": "⭐ NEW 発行者 IAL。"
+        },
+        "purpose": {
+          "type": "string",
+          "$comment": "⭐ NEW 処理目的。"
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "$comment": "⭐ NEW 制約。"
+        },
+        "consentBasis": {
+          "$comment": "⭐ NEW GDPR Art.6 法的根拠",
+          "enum": [
+            "consent",
+            "contract",
+            "legal_obligation",
+            "vital_interests",
+            "public_task",
+            "legitimate_interests"
+          ]
         }
       },
       "required": [
@@ -3113,6 +3139,132 @@
         "$hashChain": {
           "type": "object",
           "description": "a2-sign SDK: セッション内順序保証。seqNoはAuditSession内連番。"
+        },
+        "modelName": {
+          "type": "string",
+          "description": "推論モデル名。EU AI Act 透明性。"
+        },
+        "provider": {
+          "type": "string",
+          "description": "モデル提供者。"
+        },
+        "deploymentId": {
+          "type": "string",
+          "description": "デプロイ識別子。再現性検証。"
+        },
+        "riskLevel": {
+          "$comment": "EU AI Act リスク分類 ⭐ NEW",
+          "enum": [
+            "minimal",
+            "limited",
+            "high",
+            "unacceptable"
+          ]
+        },
+        "explainability": {
+          "type": "object",
+          "$comment": "EU AI Act Art.13 透明性 ⭐ NEW",
+          "properties": {
+            "method": {
+              "enum": [
+                "SHAP",
+                "LIME",
+                "attention",
+                "rule-based",
+                "other"
+              ]
+            },
+            "factors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "feature": {
+                    "type": "string"
+                  },
+                  "importance": {
+                    "type": "number"
+                  },
+                  "direction": {
+                    "enum": [
+                      "positive",
+                      "negative"
+                    ]
+                  }
+                }
+              }
+            },
+            "humanReadableExplanation": {
+              "type": "string"
+            }
+          }
+        },
+        "humanOversight": {
+          "type": "object",
+          "$comment": "EU AI Act Art.14 人的監督の詳細 ⭐ NEW (既存 humanOverride boolean を補完)。",
+          "properties": {
+            "required": {
+              "type": "boolean"
+            },
+            "performed": {
+              "type": "boolean"
+            },
+            "approverId": {
+              "type": "string"
+            },
+            "approverIalLevel": {
+              "$ref": "#/$defs/IALLevel"
+            },
+            "approvedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "decision": {
+              "enum": [
+                "approved",
+                "rejected",
+                "modified"
+              ]
+            },
+            "modifications": {
+              "type": "object"
+            },
+            "reasoning": {
+              "type": "string"
+            }
+          }
+        },
+        "dataLineage": {
+          "type": "object",
+          "$comment": "入力データ出所追跡 ⭐ NEW",
+          "properties": {
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "dataId": {
+                    "type": "string"
+                  },
+                  "sourceType": {
+                    "enum": [
+                      "user-input",
+                      "database",
+                      "external-api",
+                      "training-data"
+                    ]
+                  },
+                  "collectedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "consentReceiptId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "required": [
@@ -3157,7 +3309,8 @@
             "food",
             "medical",
             "transport",
-            "general"
+            "general",
+            "compliance"
           ],
           "description": "ロボット運用ドメイン"
         },
@@ -3244,6 +3397,13 @@
         "$hashChain": {
           "type": "object",
           "description": "a2-sign SDK: セッション単位HashChain。prevSessionIdの前セッション最終blockHashをこのセッション最初のprevHashとして使用。セッション跨ぎ連続性保証。"
+        },
+        "complianceFrameworks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ComplianceFrameworkEnum"
+          },
+          "$comment": "⭐ NEW このセッションに適用される Compliance フレームワーク。"
         }
       },
       "required": [
@@ -3675,7 +3835,7 @@
         "appliesTo": {
           "type": "array",
           "items": {
-            "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+            "$ref": "#/$defs/BaseRef"
           }
         },
         "survivesTermination": {
@@ -3686,7 +3846,7 @@
           "description": "ISO 8601 duration."
         },
         "standardClauseRef": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+          "$ref": "#/$defs/BaseRef"
         },
         "isCustomized": {
           "type": "boolean"
@@ -3726,14 +3886,14 @@
         "containsObligations": {
           "type": "array",
           "items": {
-            "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+            "$ref": "#/$defs/BaseRef"
           }
         }
       },
       "required": [
         "clauseType"
       ],
-      "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/SemanticBlock"
+      "$ref": "#/$defs/SemanticBlock"
     },
     "ClauseTypeEnum": {
       "type": "string",
@@ -3927,7 +4087,7 @@
       "description": "Notarial attestation. Covers traditional and remote online notarization (RON).",
       "properties": {
         "notary": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/ActorObject"
+          "$ref": "#/$defs/ActorObject"
         },
         "notaryCommissionId": {
           "type": "string"
@@ -3949,7 +4109,7 @@
           "format": "date-time"
         },
         "notarySignature": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BlockSignature"
+          "$ref": "#/$defs/BlockSignature"
         },
         "notarialActType": {
           "type": "string",
@@ -3962,10 +4122,10 @@
           ]
         },
         "sealImage": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/ExternalPayload"
+          "$ref": "#/$defs/ExternalPayload"
         },
         "ronSessionRecording": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/ExternalPayload"
+          "$ref": "#/$defs/ExternalPayload"
         },
         "apostilleNumber": {
           "type": "string",
@@ -4060,7 +4220,7 @@
           "$ref": "#/$defs/PartyContact"
         },
         "signatoryRef": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+          "$ref": "#/$defs/BaseRef"
         },
         "signatoryName": {
           "type": "string",
@@ -4145,7 +4305,7 @@
               ]
             },
             "evidence": {
-              "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+              "$ref": "#/$defs/BaseRef"
             }
           }
         }
@@ -4154,7 +4314,7 @@
         "partyRole",
         "legalName"
       ],
-      "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/Entity"
+      "$ref": "#/$defs/Entity"
     },
     "PartyAddress": {
       "type": "object",
@@ -4374,7 +4534,7 @@
           "type": "string"
         },
         "targetRef": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+          "$ref": "#/$defs/BaseRef"
         },
         "action": {
           "$ref": "#/$defs/RedlineActionEnum"
@@ -4386,7 +4546,7 @@
           "type": "string"
         },
         "proposedBy": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/ActorObject"
+          "$ref": "#/$defs/ActorObject"
         },
         "proposedAt": {
           "type": "string",
@@ -4406,7 +4566,7 @@
           ]
         },
         "respondedBy": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/ActorObject"
+          "$ref": "#/$defs/ActorObject"
         },
         "respondedAt": {
           "type": "string",
@@ -4421,7 +4581,7 @@
         "targetRef",
         "action"
       ],
-      "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/Entity"
+      "$ref": "#/$defs/Entity"
     },
     "RedlineActionEnum": {
       "type": "string",
@@ -4443,10 +4603,10 @@
           "const": "SignatoryBlock"
         },
         "partyRef": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+          "$ref": "#/$defs/BaseRef"
         },
         "signatory": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/ActorObject"
+          "$ref": "#/$defs/ActorObject"
         },
         "signatoryTitle": {
           "type": "string",
@@ -4457,7 +4617,7 @@
           "description": "e.g., 'as duly authorized officer', 'pursuant to board resolution of YYYY-MM-DD'."
         },
         "signature": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BlockSignature"
+          "$ref": "#/$defs/BlockSignature"
         },
         "signedAt": {
           "type": "string",
@@ -4489,7 +4649,7 @@
         "partyRef",
         "state"
       ],
-      "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/Entity"
+      "$ref": "#/$defs/Entity"
     },
     "SigningCeremonyEvidence": {
       "type": "object",
@@ -4539,7 +4699,7 @@
               ]
             },
             "captureRef": {
-              "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+              "$ref": "#/$defs/BaseRef"
             },
             "verificationConfidence": {
               "type": "number",
@@ -4605,7 +4765,7 @@
               "format": "date-time"
             },
             "evidenceRef": {
-              "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BaseRef"
+              "$ref": "#/$defs/BaseRef"
             }
           }
         }
@@ -4691,10 +4851,10 @@
       "description": "Witness to a signature.",
       "properties": {
         "witness": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/ActorObject"
+          "$ref": "#/$defs/ActorObject"
         },
         "witnessSignature": {
-          "$ref": "https://a2-schema.org/vault/v0.0.6/schema.json#/$defs/BlockSignature"
+          "$ref": "#/$defs/BlockSignature"
         },
         "witnessedAt": {
           "type": "string",
@@ -4761,6 +4921,744 @@
     "_____S9_FUTURE_DOC_TYPES_____": {
       "description": "─── §9 Reserved for future modules (Medical, Robot, Life …) ───",
       "x-a2-section": true
+    },
+    "_____S10_COMPLIANCE_____": {
+      "description": "─── §10 Compliance: GDPR / EU AI Act / SOC 2 / ISO 27001 / HIPAA / PCI DSS / ESG ───",
+      "x-a2-section": true
+    },
+    "ComplianceFrameworkEnum": {
+      "$comment": "§10. 対応 Compliance フレームワーク。",
+      "enum": [
+        "SOC2_TSC",
+        "ISO27001_AnnexA",
+        "ISO27017",
+        "ISO27018",
+        "GDPR",
+        "CCPA",
+        "JP_PIPA",
+        "EU_AI_Act",
+        "NIST_AI_RMF",
+        "HIPAA",
+        "PCI_DSS",
+        "NIST_800_53",
+        "NIST_CSF",
+        "FedRAMP",
+        "FISC",
+        "JP_3SHO_2GL",
+        "ESG",
+        "TCFD",
+        "CSDDD",
+        "NIS2",
+        "JP_DENSHO",
+        "JP_INVOICE"
+      ]
+    },
+    "ConsentReceipt": {
+      "type": "object",
+      "$comment": "§10. GDPR / CCPA / 個人情報保護法 / ESIGN 同意記録。Kantara Consent Receipt v1.1 準拠。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L8",
+      "properties": {
+        "$tag": {
+          "const": "ConsentReceipt"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "version": {
+          "type": "string",
+          "default": "1.1.0"
+        },
+        "receiptType": {
+          "enum": [
+            "data-processing",
+            "esign-disclosure",
+            "marketing",
+            "cookie",
+            "biometric",
+            "ai-processing",
+            "third-party-sharing"
+          ]
+        },
+        "dataSubject": {
+          "type": "object",
+          "properties": {
+            "subjectId": {
+              "type": "string"
+            },
+            "verificationMethod": {
+              "type": "string"
+            },
+            "ialLevel": {
+              "$ref": "#/$defs/IALLevel"
+            }
+          }
+        },
+        "dataController": {
+          "type": "object",
+          "properties": {
+            "organizationId": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "contactEmail": {
+              "type": "string",
+              "format": "email"
+            },
+            "jurisdiction": {
+              "type": "string"
+            }
+          }
+        },
+        "purposes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "purposeCode": {
+                "type": "string"
+              },
+              "purposeDescription": {
+                "type": "string"
+              },
+              "legalBasis": {
+                "enum": [
+                  "consent",
+                  "contract",
+                  "legal_obligation",
+                  "vital_interests",
+                  "public_task",
+                  "legitimate_interests"
+                ]
+              },
+              "retentionPeriod": {
+                "type": "string",
+                "description": "ISO 8601 duration (e.g., P1Y, P30D)"
+              }
+            }
+          }
+        },
+        "dataCategories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "thirdPartySharing": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "recipientName": {
+                "type": "string"
+              },
+              "jurisdiction": {
+                "type": "string"
+              },
+              "purpose": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "rights": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "access",
+              "rectification",
+              "erasure",
+              "portability",
+              "object",
+              "withdraw"
+            ]
+          }
+        },
+        "withdrawalMethod": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string"
+            }
+          }
+        },
+        "consentGivenAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "consentValidUntil": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "consentMethod": {
+          "enum": [
+            "explicit-checkbox",
+            "explicit-signature",
+            "implicit",
+            "biometric"
+          ]
+        },
+        "evidenceUri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "receiptType",
+        "dataSubject",
+        "dataController",
+        "purposes",
+        "consentGivenAt"
+      ]
+    },
+    "ComplianceLog": {
+      "type": "object",
+      "$comment": "§10. 汎用 Compliance 統制実施ログ。SOC 2 / ISO 27001 / HIPAA / PCI DSS の自動証拠収集。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "ComplianceLog"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "controlIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "適用統制ID (例: SOC2.CC6.1, ISO27001.A.9.1, GDPR.Art32)"
+        },
+        "framework": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ComplianceFrameworkEnum"
+          }
+        },
+        "controlType": {
+          "enum": [
+            "preventive",
+            "detective",
+            "corrective",
+            "compensating"
+          ]
+        },
+        "evidence": {
+          "type": "object",
+          "description": "統制実施の証拠データ (フリーフォーム)"
+        },
+        "result": {
+          "enum": [
+            "compliant",
+            "non-compliant",
+            "partial",
+            "not-applicable"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "collectionMethod": {
+          "enum": [
+            "automatic",
+            "semi-automatic",
+            "manual"
+          ]
+        },
+        "remediationActions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string"
+              },
+              "performedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "performerId": {
+                "type": "string"
+              },
+              "result": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "controlIds",
+        "framework",
+        "timestamp"
+      ]
+    },
+    "DataLineage": {
+      "type": "object",
+      "$comment": "§10. データ出所追跡。GDPR / EU AI Act 対応。",
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "DataLineage"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "dataId": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sourceType": {
+                "enum": [
+                  "user-input",
+                  "database",
+                  "external-api",
+                  "training-data",
+                  "ai-generated",
+                  "third-party"
+                ]
+              },
+              "sourceId": {
+                "type": "string"
+              },
+              "collectedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "consentReceiptId": {
+                "type": "string"
+              },
+              "transformations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id"
+      ]
+    },
+    "PIIDetection": {
+      "type": "object",
+      "$comment": "§10. 個人情報 (PII) 検出記録。GDPR / 個人情報保護法対応。",
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "PIIDetection"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "documentId": {
+          "type": "string"
+        },
+        "detections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "piiType": {
+                "enum": [
+                  "name",
+                  "email",
+                  "phone",
+                  "address",
+                  "national-id",
+                  "passport",
+                  "drivers-license",
+                  "credit-card",
+                  "bank-account",
+                  "health-data",
+                  "biometric",
+                  "genetic",
+                  "location",
+                  "ip-address"
+                ]
+              },
+              "location": {
+                "type": "string",
+                "description": "Document path or coordinates"
+              },
+              "confidence": {
+                "$ref": "#/$defs/ConfidenceType"
+              },
+              "maskingApplied": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "detectedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        }
+      },
+      "required": [
+        "$tag",
+        "id"
+      ]
+    },
+    "DataSubjectRequest": {
+      "type": "object",
+      "$comment": "§10. データ主体権利行使要求 (GDPR Art 15-22)。RTBF 対応。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "DataSubjectRequest"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "requestType": {
+          "enum": [
+            "access",
+            "rectification",
+            "erasure",
+            "restrict",
+            "portability",
+            "object"
+          ]
+        },
+        "subjectId": {
+          "type": "string"
+        },
+        "verificationMethod": {
+          "type": "string"
+        },
+        "ialLevel": {
+          "$ref": "#/$defs/IALLevel"
+        },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "responseDeadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "GDPR 1ヶ月以内"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "in-progress",
+            "completed",
+            "rejected",
+            "extended"
+          ]
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rejectionReason": {
+          "type": "string"
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "requestType",
+        "subjectId"
+      ]
+    },
+    "IncidentReport": {
+      "type": "object",
+      "$comment": "§10. セキュリティインシデント記録。NIS2 24h通報 / GDPR Art 33 (72h通報) 対応。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "IncidentReport"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "incidentType": {
+          "enum": [
+            "data-breach",
+            "system-compromise",
+            "ddos",
+            "ransomware",
+            "insider-threat",
+            "other"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "detectedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "discoveredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "containedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "affectedDataSubjects": {
+          "type": "integer"
+        },
+        "affectedDataTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "recipient": {
+                "enum": [
+                  "authority",
+                  "data-subjects",
+                  "public"
+                ]
+              },
+              "sentAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "method": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "remediation": {
+          "type": "string"
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "incidentType",
+        "severity"
+      ]
+    },
+    "AccessControlEvent": {
+      "type": "object",
+      "$comment": "§10. アクセス制御イベント。SOC 2 CC6.x / ISO 27001 A.9.x 対応。",
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "AccessControlEvent"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "eventType": {
+          "enum": [
+            "login-success",
+            "login-failure",
+            "logout",
+            "session-timeout",
+            "permission-granted",
+            "permission-denied",
+            "role-assigned",
+            "role-revoked",
+            "privilege-escalation",
+            "data-access",
+            "data-modification",
+            "data-deletion"
+          ]
+        },
+        "actorId": {
+          "type": "string"
+        },
+        "resourceId": {
+          "type": "string"
+        },
+        "ialLevel": {
+          "$ref": "#/$defs/IALLevel"
+        },
+        "aalLevel": {
+          "$ref": "#/$defs/AALLevel"
+        },
+        "ipAddress": {
+          "type": "string"
+        },
+        "userAgent": {
+          "type": "string"
+        },
+        "deviceFingerprint": {
+          "type": "string"
+        },
+        "geolocation": {
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "allowed",
+            "denied",
+            "error"
+          ]
+        },
+        "denialReason": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "eventType",
+        "timestamp"
+      ]
+    },
+    "GovernanceAttestation": {
+      "type": "object",
+      "$comment": "§10. ガバナンス・ESG 証明。TCFD / CSDDD / 上場企業ESG開示対応。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L8",
+      "properties": {
+        "$tag": {
+          "const": "GovernanceAttestation"
+        },
+        "id": {
+          "$ref": "#/$defs/NodeIdType"
+        },
+        "attestationType": {
+          "enum": [
+            "esg",
+            "tcfd",
+            "csddd",
+            "csr",
+            "human-rights-dd"
+          ]
+        },
+        "reportingPeriod": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date"
+            },
+            "end": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "metrics": {
+          "type": "object"
+        },
+        "attestor": {
+          "type": "object",
+          "properties": {
+            "organizationId": {
+              "type": "string"
+            },
+            "officerName": {
+              "type": "string"
+            },
+            "ialLevel": {
+              "$ref": "#/$defs/IALLevel"
+            }
+          }
+        },
+        "attestedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "$signature": {
+          "$ref": "#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "attestationType"
+      ]
     }
   },
   "x-a2-input": {
