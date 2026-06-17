@@ -1,0 +1,831 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2-schema.org/profiles/delegation/v0.0.1/schema.json",
+  "title": "a2-delegation Profile v0.0.1 — Power-of-Attorney / Delegation",
+  "version": "0.0.1",
+  "description": "委任管理プロファイル。Grand Vault v0.0.9 を SSoT として外部 $ref で再利用し、委任固有エンティティのみを additive 定義。すべてのイベントは共通 Chain Ledger に entry を残す（entryHash で replay 防止）。法人・個人の双方を第一級ユーザーとして扱う。",
+  "license": "Apache-2.0",
+  "x-a2-role": "profile",
+  "x-a2-base-schema": "https://a2-schema.org/vault/v0.0.9/schema.json",
+  "x-a2-deprecation-policy": "Defs marked x-a2-deprecated remain available for 2 minor versions before removal.",
+  "$comment": "SSoT 由来の共有型は #/$defs に再定義せず、必ず vault の絶対 $id + JSON pointer で参照する（NodeIdType / SignatureBundle / HashChain / IALLevel / AALLevel / FALLevel / SigningCeremony / AccessControlEvent）。委任ロジックは署名API申請の有無に依存せず先行開発可能。",
+  "$defs": {
+    "_____DG1_SIMPLE_TYPES_____": {
+      "description": "─── §1 Delegation Simple Types ──────────────────"
+    },
+    "DelegationStatusEnum": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "suspended",
+        "revoked",
+        "expired",
+        "superseded"
+      ],
+      "description": "委任状ライフサイクル。suspended=段階的撤回の一時停止、superseded=新委任で置換、expired=有効期限切れ。"
+    },
+    "RevocationReasonEnum": {
+      "type": "string",
+      "enum": [
+        "voluntary",
+        "superseded",
+        "cascade",
+        "fraud-detected",
+        "expired",
+        "mandate-withdrawn",
+        "agent-request"
+      ],
+      "description": "失効理由。cascade=親委任失効に伴う連鎖失効、mandate-withdrawn=代理権の取消、fraud-detected=AI異常検知由来。"
+    },
+    "PrincipalKindEnum": {
+      "type": "string",
+      "enum": [
+        "corporate",
+        "individual"
+      ],
+      "description": "委任当事者の種別。corporate=法人（代表者IC署名）、individual=個人（マイナカード署名）。個人対応必須。"
+    },
+    "AuthorityScopeEnum": {
+      "type": "string",
+      "enum": [
+        "contract-execution",
+        "payment",
+        "regulatory-filing",
+        "property-transaction",
+        "procurement",
+        "hr-action",
+        "care-proxy",
+        "inheritance-procedure",
+        "tax-agent",
+        "litigation",
+        "general",
+        "custom"
+      ],
+      "description": "権限範囲。法人向け（contract-execution/payment/filing 等）と個人向け（care-proxy=介護委任 / inheritance-procedure=相続 / tax-agent=士業委任）を併存。custom 時は customDescription 必須。"
+    },
+    "SignatureMethodEnum": {
+      "type": "string",
+      "enum": [
+        "jpki-mynumber",
+        "jpki-corporate",
+        "pf-mediated",
+        "kms-es256",
+        "deferred-pending-mandate"
+      ],
+      "description": "署名手段。jpki-mynumber=マイナカード署名用電子証明書（デジタル認証アプリ署名API経由）、pf-mediated=PF事業者経由、deferred-pending-mandate=署名API認可待ちで委任ロジックのみ先行（後付け合流）。"
+    },
+    "NotificationChannelEnum": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "push",
+        "postal",
+        "partner-portal",
+        "webhook"
+      ],
+      "description": "通知チャネル（マルチチャネル）。"
+    },
+    "NotificationTriggerEnum": {
+      "type": "string",
+      "enum": [
+        "before-expiry",
+        "on-grant",
+        "on-revoke",
+        "on-cascade",
+        "on-verify-failure",
+        "on-anomaly"
+      ],
+      "description": "通知トリガ。before-expiry は offsetDays で複数タイミング設定（マルチタイミング）。"
+    },
+    "VerificationResultEnum": {
+      "type": "string",
+      "enum": [
+        "valid",
+        "revoked",
+        "expired",
+        "not-found",
+        "out-of-scope",
+        "tampered",
+        "suspended"
+      ],
+      "description": "公開検証結果。out-of-scope=権限範囲外の利用、tampered=HashChain 不整合。"
+    },
+    "AnomalyTypeEnum": {
+      "type": "string",
+      "enum": [
+        "unusual-grant-pattern",
+        "rapid-subdelegation",
+        "scope-escalation",
+        "off-hours-grant",
+        "geo-mismatch",
+        "circular-chain",
+        "revoked-key-reuse"
+      ],
+      "description": "AI異常検知の分類。circular-chain=委任連鎖の循環、scope-escalation=権限の不正拡大。"
+    },
+    "_____DG2_CHAIN_LEDGER_____": {
+      "description": "─── §2 Chain Ledger Entry（共通台帳への記録・replay防止）──────────"
+    },
+    "ChainLedgerEntry": {
+      "type": "object",
+      "$comment": "§2. 共有 Chain Ledger への 1 エントリ。委任の付与・失効・検証はすべてこれを残す。a2-compliance はマージせず参照のみ。",
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "ChainLedgerEntry"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "ledgerNamespace": {
+          "type": "string",
+          "format": "uri",
+          "description": "共通台帳名前空間。a2-sign / a2-vault と同一空間を共有。"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "名前空間内の単調増加シーケンス。"
+        },
+        "entryHash": {
+          "type": "string",
+          "description": "本エントリの正準ハッシュ。replay 防止の一意キー。"
+        },
+        "prevHash": {
+          "type": "string",
+          "description": "直前エントリのハッシュ。連鎖の検証に使用。"
+        },
+        "eventTag": {
+          "type": "string",
+          "enum": [
+            "DelegationGrant",
+            "DelegationRevocation",
+            "VerificationLog",
+            "PartnerReceipt",
+            "NotificationDispatch",
+            "AnomalyDetection"
+          ],
+          "description": "本エントリが表す権限イベント種別（AccessControlEvent 相当のレンズ対象）。"
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "ledgerNamespace",
+        "entryHash",
+        "eventTag",
+        "recordedAt"
+      ]
+    },
+    "_____DG3_PARTY_AUTHORITY_____": {
+      "description": "─── §3 当事者と権限範囲 ──────────────────"
+    },
+    "DelegationParty": {
+      "type": "object",
+      "$comment": "§3. 委任の当事者（委任者 principal / 受任者 agent）。法人・個人を共通表現。",
+      "x-a2-level": "L6",
+      "properties": {
+        "$tag": {
+          "const": "DelegationParty"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "partyKind": {
+          "$ref": "#/$defs/PrincipalKindEnum"
+        },
+        "actorId": {
+          "type": "string",
+          "description": "account-db 上のアクター識別子。"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "organizationId": {
+          "type": "string",
+          "description": "法人時のみ。法人番号等。"
+        },
+        "representativeName": {
+          "type": "string",
+          "description": "法人代表者名（corporate のとき）。"
+        },
+        "ialLevel": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/IALLevel"
+        },
+        "aalLevel": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/AALLevel"
+        },
+        "signatureMethod": {
+          "$ref": "#/$defs/SignatureMethodEnum"
+        },
+        "jpkiCertSerial": {
+          "type": "string",
+          "description": "マイナカード署名用電子証明書のシリアル（jpki-mynumber 時）。生値は保持せずハッシュ参照を推奨。"
+        },
+        "pfProviderId": {
+          "type": "string",
+          "description": "PF事業者識別子（pf-mediated 時、または民間直結不可の回避経路）。"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "partyKind",
+        "actorId"
+      ]
+    },
+    "AuthorityGrant": {
+      "type": "object",
+      "$comment": "§3. 委ねる権限の単位。1 委任状に複数可。",
+      "x-a2-level": "L6",
+      "properties": {
+        "$tag": {
+          "const": "AuthorityGrant"
+        },
+        "scope": {
+          "$ref": "#/$defs/AuthorityScopeEnum"
+        },
+        "customDescription": {
+          "type": "string",
+          "description": "scope=custom 時に必須の自由記述。"
+        },
+        "subDelegationAllowed": {
+          "type": "boolean",
+          "default": false,
+          "description": "再委任（連鎖の子作成）可否。"
+        },
+        "constraints": {
+          "type": "object",
+          "description": "権限の境界条件。公開検証 API の out-of-scope 判定に使用。",
+          "properties": {
+            "amountLimit": {
+              "type": "number",
+              "minimum": 0
+            },
+            "currency": {
+              "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/CurrencyType"
+            },
+            "allowedCounterparties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "allowedResources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "jurisdiction": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "$tag",
+        "scope"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "scope": {
+                "const": "custom"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "customDescription"
+            ]
+          }
+        }
+      ]
+    },
+    "_____DG4_POWER_OF_ATTORNEY_____": {
+      "description": "─── §4 委任状本体（PowerOfAttorney）──────────────────"
+    },
+    "PowerOfAttorney": {
+      "type": "object",
+      "$comment": "§4. 委任状本体。委任者/受任者/権限範囲/有効期限。署名対象（x-a2-sign-target）。署名 API 認可前は signatureMethod=deferred-pending-mandate で発行し後付け合流。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L8",
+      "properties": {
+        "$tag": {
+          "const": "PowerOfAttorney"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "title": {
+          "type": "string"
+        },
+        "principal": {
+          "$ref": "#/$defs/DelegationParty",
+          "description": "委任者。"
+        },
+        "agent": {
+          "$ref": "#/$defs/DelegationParty",
+          "description": "受任者。"
+        },
+        "authority": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/AuthorityGrant"
+          },
+          "description": "委ねる権限範囲（複数可）。"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "$ref": "#/$defs/DelegationStatusEnum"
+        },
+        "parentPoaId": {
+          "type": "string",
+          "description": "親委任の id（再委任時）。連鎖失効の波及対象。"
+        },
+        "governingLaw": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "civil-code-jp",
+              "e-delegation-act-jp",
+              "gdpr",
+              "eu-ai-act"
+            ]
+          },
+          "description": "適用法。民法 / 電子委任状法 / GDPR / EU AI Act。"
+        },
+        "signingCeremonyRef": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/SigningCeremony",
+          "description": "SSoT の汎用署名儀式（ceremonyType=delegation）を再利用。"
+        },
+        "$signature": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/HashChain"
+        },
+        "$chainLedgerEntry": {
+          "$ref": "#/$defs/ChainLedgerEntry"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "principal",
+        "agent",
+        "authority",
+        "validFrom",
+        "status"
+      ]
+    },
+    "_____DG5_EVENTS_____": {
+      "description": "─── §5 付与・失効イベント ──────────────────"
+    },
+    "DelegationGrant": {
+      "type": "object",
+      "$comment": "§5. 委任の付与イベント。AccessControlEvent(role-assigned/permission-granted) 相当として共通台帳へ。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "DelegationGrant"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "poaId": {
+          "type": "string",
+          "description": "対象 PowerOfAttorney の id。"
+        },
+        "grantedBy": {
+          "type": "string",
+          "description": "付与を実行したアクター（委任者本人）。"
+        },
+        "grantedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "$signature": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/HashChain"
+        },
+        "$chainLedgerEntry": {
+          "$ref": "#/$defs/ChainLedgerEntry"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "poaId",
+        "grantedAt"
+      ]
+    },
+    "DelegationRevocation": {
+      "type": "object",
+      "$comment": "§5. 失効イベント（即時撤回）。cascade=true で子委任を連鎖失効。過去署名の有効性は TSA 時刻保証で別途担保。",
+      "x-a2-sign-target": true,
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "DelegationRevocation"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "poaId": {
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "#/$defs/RevocationReasonEnum"
+        },
+        "cascade": {
+          "type": "boolean",
+          "default": false,
+          "description": "true のとき parentPoaId が本 poaId を指す子委任をすべて連鎖失効。"
+        },
+        "cascadedPoaIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "連鎖失効した子委任の id 一覧（監査用）。"
+        },
+        "effectiveAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "失効発効時刻。即時撤回は recordedAt と一致。"
+        },
+        "revokedBy": {
+          "type": "string"
+        },
+        "$signature": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/SignatureBundle"
+        },
+        "$hashChain": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/HashChain"
+        },
+        "$chainLedgerEntry": {
+          "$ref": "#/$defs/ChainLedgerEntry"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "poaId",
+        "reason",
+        "effectiveAt"
+      ]
+    },
+    "_____DG6_CHAIN_____": {
+      "description": "─── §6 委任連鎖（親子・連鎖失効関係）──────────────────"
+    },
+    "DelegationChain": {
+      "type": "object",
+      "$comment": "§6. 委任の親子関係グラフ。循環検出（AnomalyTypeEnum.circular-chain）と連鎖失効の波及計算に使用。",
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "DelegationChain"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "rootPoaId": {
+          "type": "string",
+          "description": "連鎖の根（最上位の委任）。"
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "parentPoaId": {
+                "type": "string"
+              },
+              "childPoaId": {
+                "type": "string"
+              },
+              "depth": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "parentPoaId",
+              "childPoaId"
+            ]
+          }
+        },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "再委任の最大深さ制限（ポリシー）。"
+        },
+        "$hashChain": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/HashChain"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "rootPoaId",
+        "edges"
+      ]
+    },
+    "_____DG7_VERIFICATION_____": {
+      "description": "─── §7 公開検証ログ ──────────────────"
+    },
+    "VerificationLog": {
+      "type": "object",
+      "$comment": "§7. 公開検証 API の記録。第三者（取引先）がリアルタイムで有効性確認した結果を改ざん不能に保管。",
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "VerificationLog"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "poaId": {
+          "type": "string"
+        },
+        "verifierId": {
+          "type": "string",
+          "description": "検証者。匿名公開検証時は null 可。"
+        },
+        "requestedScope": {
+          "$ref": "#/$defs/AuthorityScopeEnum",
+          "description": "検証対象の権限。out-of-scope 判定に使用。"
+        },
+        "result": {
+          "$ref": "#/$defs/VerificationResultEnum"
+        },
+        "ialLevelAtVerify": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/IALLevel"
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "$hashChain": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/HashChain"
+        },
+        "$chainLedgerEntry": {
+          "$ref": "#/$defs/ChainLedgerEntry"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "poaId",
+        "result",
+        "verifiedAt"
+      ]
+    },
+    "_____DG8_NOTIFICATION_____": {
+      "description": "─── §8 期限通知スケジュール ──────────────────"
+    },
+    "NotificationSchedule": {
+      "type": "object",
+      "$comment": "§8. 期限事前通知（マルチタイミング・マルチチャネル）。",
+      "x-a2-level": "L6",
+      "properties": {
+        "$tag": {
+          "const": "NotificationSchedule"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "poaId": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "trigger": {
+                "$ref": "#/$defs/NotificationTriggerEnum"
+              },
+              "offsetDays": {
+                "type": "integer",
+                "description": "before-expiry 時の事前日数（複数ルールで複数タイミング）。"
+              },
+              "channels": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/NotificationChannelEnum"
+                }
+              },
+              "recipients": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "trigger",
+              "channels"
+            ]
+          }
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "poaId",
+        "rules"
+      ]
+    },
+    "_____DG9_ANOMALY_____": {
+      "description": "─── §9 AI異常検知 ──────────────────"
+    },
+    "AnomalyDetection": {
+      "type": "object",
+      "$comment": "§9. 不自然な委任パターンの検出。EU AI Act 対応のため判定根拠を記録（説明可能性）。",
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "AnomalyDetection"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "poaId": {
+          "type": "string"
+        },
+        "anomalyType": {
+          "$ref": "#/$defs/AnomalyTypeEnum"
+        },
+        "score": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/ConfidenceType"
+        },
+        "explanation": {
+          "type": "string",
+          "description": "判定根拠（EU AI Act 透明性要件）。"
+        },
+        "recommendedAction": {
+          "type": "string",
+          "enum": [
+            "none",
+            "flag",
+            "suspend",
+            "revoke",
+            "escalate"
+          ]
+        },
+        "detectedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "$chainLedgerEntry": {
+          "$ref": "#/$defs/ChainLedgerEntry"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "anomalyType",
+        "detectedAt"
+      ]
+    },
+    "_____DG10_PARTNER_PORTAL_____": {
+      "description": "─── §10 取引先ポータル受領 ──────────────────"
+    },
+    "PartnerReceipt": {
+      "type": "object",
+      "$comment": "§10. 取引先（相手方）が委任状を確認・受領した記録。受領フローの証跡。",
+      "x-a2-level": "L7",
+      "properties": {
+        "$tag": {
+          "const": "PartnerReceipt"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "poaId": {
+          "type": "string"
+        },
+        "partnerOrganizationId": {
+          "type": "string"
+        },
+        "receivedBy": {
+          "type": "string"
+        },
+        "acknowledgement": {
+          "type": "string",
+          "enum": [
+            "viewed",
+            "accepted",
+            "disputed",
+            "rejected"
+          ]
+        },
+        "receivedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "$hashChain": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/HashChain"
+        },
+        "$chainLedgerEntry": {
+          "$ref": "#/$defs/ChainLedgerEntry"
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "poaId",
+        "acknowledgement",
+        "receivedAt"
+      ]
+    },
+    "_____DG11_ROOT_____": {
+      "description": "─── §11 ドキュメントルート ──────────────────"
+    },
+    "DelegationProfileRoot": {
+      "type": "object",
+      "$comment": "§11. a2-delegation ドキュメントのルート。1 委任案件に紐づく全エンティティを束ねる。",
+      "x-a2-doctype": "a2.delegation.power-of-attorney",
+      "x-a2-level": "L9",
+      "properties": {
+        "$tag": {
+          "const": "DelegationProfileRoot"
+        },
+        "id": {
+          "$ref": "https://a2-schema.org/vault/v0.0.9/schema.json#/$defs/NodeIdType"
+        },
+        "profileVersion": {
+          "const": "0.0.1"
+        },
+        "powerOfAttorney": {
+          "$ref": "#/$defs/PowerOfAttorney"
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DelegationGrant"
+          }
+        },
+        "revocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DelegationRevocation"
+          }
+        },
+        "chain": {
+          "$ref": "#/$defs/DelegationChain"
+        },
+        "verifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VerificationLog"
+          }
+        },
+        "notifications": {
+          "$ref": "#/$defs/NotificationSchedule"
+        },
+        "anomalies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnomalyDetection"
+          }
+        },
+        "partnerReceipts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PartnerReceipt"
+          }
+        }
+      },
+      "required": [
+        "$tag",
+        "id",
+        "profileVersion",
+        "powerOfAttorney"
+      ]
+    }
+  },
+  "$ref": "#/$defs/DelegationProfileRoot"
+}
