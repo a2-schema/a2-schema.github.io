@@ -28,7 +28,7 @@ GV_ID = DOMAIN + "vault/v0.0.9/schema.json"
 SIG_ID = DOMAIN + "profiles/signature/v0.0.2/schema.json"
 CT_ID = DOMAIN + "profiles/contract/v0.1.8/schema.json"
 COMP_ID = DOMAIN + "profiles/compliance/v0.0.1/schema.json"
-TIER_META_ID = DOMAIN + "tier-config/v0.1.0/schema.json"   # meta-schema describing tier configs
+TIER_META_ID = DOMAIN + "tier-configs/_meta/v0.1.0/schema.json"   # meta-schema describing tier configs (under tier-configs/)
 GVREF = GV_ID + "#/$defs/"
 
 gv = json.load(open(f"{DX}/xml/ichiriXML/a2_grand_vault_v_00_00_07.schema.json"))

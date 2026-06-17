@@ -78,7 +78,7 @@ Each artifact is **immutable per version** and served at a URL whose path mirror
 
 - Vault: `https://a2-schema.org/vault/v0.0.9/schema.json`
 - Profile: `https://a2-schema.org/profiles/<name>/<ver>/schema.json`
-- Tier config: `https://a2-schema.org/tier-configs/<tier>/<ver>/config.json` (a build manifest, **not** an instance schema; described by the [tier-config meta-schema](tier-config/v0.1.0/schema.json))
+- Tier config: `https://a2-schema.org/tier-configs/<tier>/<ver>/config.json` (a build manifest, **not** an instance schema; described by the [tier-config meta-schema](tier-configs/_meta/v0.1.0/schema.json))
 - **`latest` alias** (e.g. `…/vault/latest/schema.json`) mirrors the newest version for humans/tools; profiles and tiers always pin an **exact** version in their `$ref`s.
 
 ## Schemas

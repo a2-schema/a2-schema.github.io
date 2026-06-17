@@ -1,5 +1,5 @@
 {
-  "$schema": "https://a2-schema.org/tier-config/v0.1.0/schema.json",
+  "$schema": "https://a2-schema.org/tier-configs/_meta/v0.1.0/schema.json",
   "$id": "https://a2-schema.org/tier-configs/a2-sign/v0.0.2/config.json",
   "kind": "tier-config",
   "tier": "a2-sign",
