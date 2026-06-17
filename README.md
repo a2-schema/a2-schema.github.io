@@ -71,15 +71,25 @@ Dependency is strictly one-way (Profiles/Tiers → Grand Vault); the Vault refer
 nothing outside itself (only **local** `#/$defs` refs). New document types are added by
 extending a Vault section and adding a profile — never by duplicating defs.
 
-### Versioning & URLs
+### Versioning & URLs (convention for all future schemas)
 
-Each artifact is **immutable per version** and served at a URL whose path mirrors its
-`$id`, so every `$id`/`$ref` resolves directly:
+Each published artifact is **immutable per version** and served at a URL whose path **mirrors its
+`$id`**, so every `$id`/`$ref` resolves directly at the domain root:
 
-- Vault: `https://a2-schema.org/vault/v0.0.9/schema.json`
-- Profile: `https://a2-schema.org/profiles/<name>/<ver>/schema.json`
-- Tier config: `https://a2-schema.org/tier-configs/<tier>/<ver>/config.json` (a build manifest, **not** an instance schema; described by the [tier-config meta-schema](tier-configs/_meta/v0.1.0/schema.json))
-- **`latest` alias** (e.g. `…/vault/latest/schema.json`) mirrors the newest version for humans/tools; profiles and tiers always pin an **exact** version in their `$ref`s.
+- **Vault**: `https://a2-schema.org/vault/v<MAJOR.MINOR.PATCH>/schema.json`
+- **Profile**: `https://a2-schema.org/profiles/<name>/v<ver>/schema.json`
+- **`latest` alias** (e.g. `…/vault/latest/schema.json`) is a byte-copy of the newest version for
+  humans/tools; its internal `$id` still names the real version. Profiles always pin an **exact**
+  version in their `$ref`s — never `latest`.
+
+**Rules (full spec: dx-platform `docs/schema-architecture.md` §8):**
+- File path == `$id` path (no `/schemas/` prefix; ends in `schema.json`). Version in the **path**.
+- **Immutable**: never change a published version's bytes — ship a new version. PATCH = additive/
+  back-compat; MAJOR = breaking. A generated/derived schema gets its **own** `$id`, never the vault's.
+- **Public surface = Grand Vault + profiles only.** **Tier configs, modules, generated tiered schemas
+  and `$formDesign` are NOT published** — they are internal build inputs/outputs (tier configs also
+  carry app-specific UI/look metadata). The deployable per-doctype schema is generated and embedded in
+  apps, not exposed as a public `$id`.
 
 ## Schemas
 
@@ -92,13 +102,14 @@ Each artifact is **immutable per version** and served at a URL whose path mirror
 
 > Prior versions ([Grand Vault v0.0.8](vault/v0.0.8/schema.json), [Signature v0.0.1](profiles/signature/v0.0.1/schema.json), [Contract v0.1.7](profiles/contract/v0.1.7/schema.json)) remain published for `$ref` stability. v0.0.9 is **purely additive** over v0.0.8.
 
-## Tier Configurations (App Profiles)
+## Tier configs — not published
 
-| Tier | Version | Use Case |
-|---|---|---|
-| [a2-sign](tier-configs/a2-sign/v0.0.2/config.json) | v0.0.2 | Electronic signature application |
-| [a2-doc](tier-configs/a2-doc/v0.0.4/config.json) | v0.0.4 | General document processing |
-| [a2-compliance](tier-configs/a2-compliance/v0.0.1/config.json) | v0.0.1 | **NEW** — Compliance management (automated evidence, audit trail) |
+Per-app **tier configs** (a2-sign, a2-doc, a2-compliance, …) are **internal build manifests**, not
+part of this public registry. They select GV defs per app/doctype and also carry app-specific UI/look
+metadata (the seed for the document `$formDesign`), which is not public vocabulary. The deployable
+per-doctype schema is *generated* from a tier (self-contained, its own `$id`) and embedded in the
+consuming app — it is not exposed here. Tier sources live in the private dx-platform repo
+(`xml/ichiriXML/tier_configs/`). See dx-platform `docs/schema-architecture.md` §5, §8.
 
 ## Compliance Frameworks Supported (§10)
 

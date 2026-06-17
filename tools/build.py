@@ -494,83 +494,13 @@ print("signature-profile unresolved:", check_profile(sig_profile) or "NONE ✓")
 print("contract-profile  unresolved:", check_profile(ct_profile) or "NONE ✓")
 print("compliance-profile unresolved:", check_profile(comp_profile) or "NONE ✓")
 
-# ---- 6. tiers -------------------------------------------------------------------
-SIGN_TIER_DEFS = ["A2Envelope", "Root", "Header", "NodeIdType", "SemanticType", "SemanticBlock",
-    "Value", "ExternalPayload", "HashChain", "BlockHashChain", "AIAction", "Instruction", "AuditSession",
-    "MLDSAAlgorithmEnum", "SignatureAlgorithmType", "BlockSignature", "SignatureBundle", "JAdESProfileEnum",
-    "JCSCanonicalizationEnum", "JWSProtectedHeaderDecoded", "HandwrittenSignature", "BiometricCapture",
-    "BiometricTypeEnum", "SigningCeremony", "CeremonyParticipant", "CeremonyTypeEnum", "IALLevel", "AALLevel",
-    "FALLevel", "ContractParty", "ContractClause", "ConsentToESign", "USESIGNCompliance", "SignatoryBlock",
-    "RedlineAction", "ContractSigningCeremony", "HandwrittenContractSignature"]
-def tier(name, version, defs, profiles, desc):
-    miss = [d for d in defs if d not in nd]
-    if miss: print(f"  ⚠ tier {name}: dropping defs not in GV: {miss}")
-    keep = [d for d in defs if d in nd]   # never select a def that has no body in GV
-    print(f"tier {name}: {len(keep)} defs selected")
-    # A tier config is NOT a JSON Schema (it validates no instances) — it is a build
-    # manifest. $schema points at its meta-schema; $id is its own resolvable URL.
-    return {"$schema": TIER_META_ID, "$id": f"{DOMAIN}tier-configs/{name}/v{version}/config.json",
-        "kind": "tier-config", "tier": name, "version": version,
-        "x-strip-mode": "selection", "description": desc,
-        "imports": {"main": GV_ID}, "profiles": profiles,
-        "baseSchemas": {"main": {"schemaHash": GV_HASH, "lastSyncedAt": "2026-06-15T00:00:00Z"}},
-        "defs": {d: {"selected": True} for d in keep}}
-
-# a2-sign: signing closure + ConsentReceipt (ESIGN disclosure for the signature flow).
-a2sign_tier = tier("a2-sign", "0.0.2", SIGN_TIER_DEFS + ["ConsentReceipt"], [SIG_ID, CT_ID],
-    "Tier config for the a2-Sign electronic-signature app: GV (SSoT) v0.0.9 + signature & contract profiles + handwritten signature + ESIGN consent.")
-
-# a2-doc: carry the in-repo doc_a2 tier's selected defs + biometric/ceremony + consent
-doc_src = json.load(open(f"{DX}/xml/ichiriXML/tier_configs/tier_doc_a2.master.json"))
-doc_selected = [k for k, v in (doc_src.get("defs") or {}).items() if isinstance(v, dict) and v.get("selected")]
-doc_defs = sorted(set(doc_selected) | {"HandwrittenSignature", "BiometricCapture",
-    "SigningCeremony", "SignatureBundle", "ConsentReceipt"})
-a2doc_tier = tier("a2-doc", "0.0.4", doc_defs, [SIG_ID],
-    "General-purpose document tier (not contract-specific). Updated for SSoT v0.0.9 + ESIGN consent.")
-
-# a2-compliance: §10 Compliance + §3 AI Audit + signing primitives for evidence sealing.
-COMPLIANCE_TIER_DEFS = [
-    # §1 common
-    "A2Envelope", "Root", "Header", "NodeIdType", "SemanticType", "SemanticBlock", "Value",
-    # §2 hashchain
-    "HashChain", "BlockHashChain",
-    # §3 AI Audit (extended)
-    "AIAction", "Instruction", "AuditSession",
-    # §4 signature
-    "MLDSAAlgorithmEnum", "BlockSignature", "SignatureBundle",
-    # §6 ceremony / identity-assurance
-    "SigningCeremony", "CeremonyParticipant", "IALLevel", "AALLevel", "FALLevel",
-    # §10 compliance (all)
-    "ComplianceLog", "ComplianceFrameworkEnum", "ConsentReceipt", "DataLineage",
-    "DataSubjectRequest", "IncidentReport", "AccessControlEvent", "PIIDetection",
-    "GovernanceAttestation"]
-a2comp_tier = tier("a2-compliance", "0.0.1", COMPLIANCE_TIER_DEFS, [COMP_ID, SIG_ID],
-    "Tier config for the a2-Compliance app: SOC 2 / ISO 27001 / GDPR / EU AI Act / HIPAA / PCI DSS — automated evidence collection, audit trail, signed compliance records.")
-
-# ---- 6b. tier-config meta-schema -------------------------------------------------
-# Real schema describing the tier-config (manifest) format, so each tier's $schema
-# resolves. Published at tier-config/v0.1.0/schema.json.
-tier_meta = {
-    "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": TIER_META_ID,
-    "title": "a2-schema Tier Config v0.1.0", "version": "0.1.0",
-    "description": "Meta-schema for a2-schema tier configs. A tier config is a BUILD MANIFEST (not an instance schema): it selects defs from the Grand Vault and drives the strip that produces a self-contained tiered schema.",
-    "license": "Apache-2.0", "x-a2-role": "meta-schema",
-    "type": "object",
-    "required": ["kind", "tier", "version", "imports", "defs"],
-    "properties": {
-        "$schema": {"type": "string"}, "$id": {"type": "string", "format": "uri"},
-        "kind": {"const": "tier-config"},
-        "tier": {"type": "string"}, "version": {"type": "string"},
-        "x-strip-mode": {"enum": ["selection", "thinning"]},
-        "description": {"type": "string"},
-        "imports": {"type": "object", "additionalProperties": {"type": "string", "format": "uri"}},
-        "profiles": {"type": "array", "items": {"type": "string", "format": "uri"}},
-        "baseSchemas": {"type": "object", "additionalProperties": {"type": "object", "properties": {
-            "schemaHash": {"type": "string"}, "lastSyncedAt": {"type": "string", "format": "date-time"}}}},
-        "defs": {"type": "object", "additionalProperties": {"type": "object", "properties": {
-            "selected": {"type": "boolean"}}}}},
-    "additionalProperties": True,
-}
+# ---- 6. tiers / tier-config meta: NOT published (decision 2026-06-17) -----------
+# Tier configs are INTERNAL build manifests: they select GV defs per app/doctype AND
+# carry app-specific UI/look metadata (x-a2-ui, per-property meta, the seed for
+# $formDesign). They are NOT part of the public schema vocabulary, so this publisher
+# does NOT generate or emit any tier config or tier-config meta-schema.
+# Public surface = Grand Vault + profiles ONLY. Tier sources live in dx-platform
+# (xml/ichiriXML/tier_configs/). See docs/schema-architecture.md §8.
 
 # ---- 7. write (path-aligned: file path == $id URL path; site root = repo root) ---
 def id_to_path(schema_id):
@@ -585,14 +515,13 @@ def w(path, obj):
     print("wrote", os.path.relpath(path, OUT), f"({os.path.getsize(path)} bytes)")
 
 # canonical, immutable, version-pinned artifacts at their $id paths + a `latest` alias.
+# Public surface = Grand Vault + profiles ONLY (no tiers — see §6 above).
 # The `latest` copy is byte-identical (its internal $id still names the real version —
 # `latest` is a convenience mirror, never a distinct identity).
-for obj in (gv8, sig_profile, ct_profile, comp_profile, tier_meta,
-            a2sign_tier, a2doc_tier, a2comp_tier):
+for obj in (gv8, sig_profile, ct_profile, comp_profile):
     p = id_to_path(obj["$id"])
     w(p, obj)
-    if obj is not tier_meta:           # meta-schema has no per-version "latest" alias
-        w(latest_path(p), obj)
+    w(latest_path(p), obj)
 
 # ---- 8. migrate frozen legacy versions into the path-aligned layout --------------
 # Older published files were flat (schemas/<name>-vNN.json). Relocate each to its $id

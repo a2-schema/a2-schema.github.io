@@ -1,2 +1,4 @@
-# obsolete: tier-config meta-schema now lives under tier-configs/_meta/
+# Tier configs are internal build manifests (live in dx-platform), NOT published here.
+# Public surface = Grand Vault + profiles only. See README "Tier configs — not published".
 /tier-config/
+/tier-configs/
