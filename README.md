@@ -95,12 +95,15 @@ Each published artifact is **immutable per version** and served at a URL whose p
 
 | Type | Schema | Version | Role |
 |---|---|---|---|
-| **SSoT** | [Grand Vault](vault/v0.0.9/schema.json) | v0.0.9 | All def definitions (§1–§10): Common, HashChain, AI Audit, Signature, Biometric, SigningCeremony, Document, Contract, **Compliance** |
-| Profile | [Signature](profiles/signature/v0.0.2/schema.json) | v0.0.2 | Signature use cases (ML-DSA, RSA, JAdES, Handwritten ISO 19794-7) |
-| Profile | [Contract](profiles/contract/v0.1.8/schema.json) | v0.1.8 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) |
-| Profile | [Compliance](profiles/compliance/v0.0.1/schema.json) | v0.0.1 | **NEW** — Compliance aggregator (GDPR, EU AI Act, SOC 2, ISO 27001, …) |
+| **SSoT** | [Grand Vault](vault/v0.0.10/schema.json) | v0.0.10 | **Lean** SSoT of shared/universal types (Common, HashChain, AI Audit, Signature, Biometric, SigningCeremony, Contract primitives, ConsentReceipt, ComplianceFrameworkEnum). Domain defs live in profiles. |
+| Profile | [Signature](profiles/signature/v0.0.3/schema.json) | v0.0.3 | Signature use cases (ML-DSA, RSA, JAdES, Handwritten ISO 19794-7) — pure aggregator |
+| Profile | [Contract](profiles/contract/v0.1.9/schema.json) | v0.1.9 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) — pure aggregator |
+| Profile | [Compliance](profiles/compliance/v0.0.2/schema.json) | v0.0.2 | Compliance (GDPR, EU AI Act, SOC 2, ISO 27001, …) — **body-owning** (owns §10 entity defs; GV-lean) |
+| Profile | [Delegation](profiles/delegation/v0.0.2/schema.json) | v0.0.2 | Power-of-attorney / delegation — **body-owning** |
 
-> Prior versions ([Grand Vault v0.0.8](vault/v0.0.8/schema.json), [Signature v0.0.1](profiles/signature/v0.0.1/schema.json), [Contract v0.1.7](profiles/contract/v0.1.7/schema.json)) remain published for `$ref` stability. v0.0.9 is **purely additive** over v0.0.8.
+> **v0.0.10 = GV-lean:** compliance §10 entity defs moved OUT of GV into the body-owning compliance
+> profile; only shared `ConsentReceipt` + `ComplianceFrameworkEnum` remain in GV (GV 135→128 defs).
+> Prior versions (GV [v0.0.8](vault/v0.0.8/schema.json)/[v0.0.9](vault/v0.0.9/schema.json), signature v0.0.1–2, contract v0.1.7–8, compliance v0.0.1, delegation v0.0.1) remain for `$ref` stability.
 
 ## Tier configs — not published
 

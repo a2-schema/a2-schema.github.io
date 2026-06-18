@@ -24,10 +24,10 @@ DX = os.environ.get("A2_DX_ROOT", os.path.expanduser("~/Documents/Business/dx-pl
 # every $id / $ref resolves directly once the domain is live.
 OUT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 DOMAIN = "https://a2-schema.org/"
-GV_ID = DOMAIN + "vault/v0.0.9/schema.json"
-SIG_ID = DOMAIN + "profiles/signature/v0.0.2/schema.json"
-CT_ID = DOMAIN + "profiles/contract/v0.1.8/schema.json"
-COMP_ID = DOMAIN + "profiles/compliance/v0.0.1/schema.json"
+GV_ID = DOMAIN + "vault/v0.0.10/schema.json"
+SIG_ID = DOMAIN + "profiles/signature/v0.0.3/schema.json"
+CT_ID = DOMAIN + "profiles/contract/v0.1.9/schema.json"
+COMP_ID = DOMAIN + "profiles/compliance/v0.0.2/schema.json"
 TIER_META_ID = DOMAIN + "tier-configs/_meta/v0.1.0/schema.json"   # meta-schema describing tier configs (under tier-configs/)
 GVREF = GV_ID + "#/$defs/"
 
@@ -272,7 +272,13 @@ add("ConsentReceipt", {
         "$signature": {"$ref": "#/$defs/SignatureBundle"}, "$hashChain": {"$ref": "#/$defs/HashChain"}},
     "required": ["$tag", "id", "receiptType", "dataSubject", "dataController", "purposes", "consentGivenAt"]})
 
-add("ComplianceLog", {
+# GV-lean (decision 2026-06-18): the §10 compliance-DOMAIN entity defs do NOT live in GV — they
+# live in the compliance PROFILE (body-owning). Only ConsentReceipt + ComplianceFrameworkEnum stay
+# in GV as SHARED types (ConsentReceipt is reused by contract; ComplianceFrameworkEnum by the core
+# AuditSession). The bodies below use local #/$defs refs; they are rewritten to absolute GV refs when
+# placed in the compliance profile (none reference each other — all refs are to GV-resident shared types).
+COMPLIANCE_PROFILE_DEFS = {
+  "ComplianceLog": {
     "type": "object",
     "$comment": "§10. 汎用 Compliance 統制実施ログ。SOC 2 / ISO 27001 / HIPAA / PCI DSS の自動証拠収集。",
     "x-a2-sign-target": True, "x-a2-level": "L7",
@@ -291,9 +297,8 @@ add("ComplianceLog", {
             "performerId": {"type": "string"}, "result": {"type": "string"}}}},
         "timestamp": {"type": "string", "format": "date-time"},
         "$signature": {"$ref": "#/$defs/SignatureBundle"}, "$hashChain": {"$ref": "#/$defs/HashChain"}},
-    "required": ["$tag", "id", "controlIds", "framework", "timestamp"]})
-
-add("DataLineage", {
+    "required": ["$tag", "id", "controlIds", "framework", "timestamp"]},
+  "DataLineage": {
     "type": "object", "$comment": "§10. データ出所追跡。GDPR / EU AI Act 対応。",
     "x-a2-level": "L7",
     "properties": {
@@ -306,9 +311,8 @@ add("DataLineage", {
             "consentReceiptId": {"type": "string"},
             "transformations": {"type": "array", "items": {"type": "string"}}}}},
         "$signature": {"$ref": "#/$defs/SignatureBundle"}, "$hashChain": {"$ref": "#/$defs/HashChain"}},
-    "required": ["$tag", "id"]})
-
-add("PIIDetection", {
+    "required": ["$tag", "id"]},
+  "PIIDetection": {
     "type": "object", "$comment": "§10. 個人情報 (PII) 検出記録。GDPR / 個人情報保護法対応。",
     "x-a2-level": "L7",
     "properties": {
@@ -323,9 +327,8 @@ add("PIIDetection", {
             "maskingApplied": {"type": "boolean"}}}},
         "detectedAt": {"type": "string", "format": "date-time"},
         "$signature": {"$ref": "#/$defs/SignatureBundle"}},
-    "required": ["$tag", "id"]})
-
-add("DataSubjectRequest", {
+    "required": ["$tag", "id"]},
+  "DataSubjectRequest": {
     "type": "object", "$comment": "§10. データ主体権利行使要求 (GDPR Art 15-22)。RTBF 対応。",
     "x-a2-sign-target": True, "x-a2-level": "L7",
     "properties": {
@@ -340,9 +343,8 @@ add("DataSubjectRequest", {
         "completedAt": {"type": "string", "format": "date-time"},
         "rejectionReason": {"type": "string"},
         "$signature": {"$ref": "#/$defs/SignatureBundle"}, "$hashChain": {"$ref": "#/$defs/HashChain"}},
-    "required": ["$tag", "id", "requestType", "subjectId"]})
-
-add("IncidentReport", {
+    "required": ["$tag", "id", "requestType", "subjectId"]},
+  "IncidentReport": {
     "type": "object",
     "$comment": "§10. セキュリティインシデント記録。NIS2 24h通報 / GDPR Art 33 (72h通報) 対応。",
     "x-a2-sign-target": True, "x-a2-level": "L7",
@@ -361,9 +363,8 @@ add("IncidentReport", {
             "sentAt": {"type": "string", "format": "date-time"}, "method": {"type": "string"}}}},
         "remediation": {"type": "string"},
         "$signature": {"$ref": "#/$defs/SignatureBundle"}, "$hashChain": {"$ref": "#/$defs/HashChain"}},
-    "required": ["$tag", "id", "incidentType", "severity"]})
-
-add("AccessControlEvent", {
+    "required": ["$tag", "id", "incidentType", "severity"]},
+  "AccessControlEvent": {
     "type": "object", "$comment": "§10. アクセス制御イベント。SOC 2 CC6.x / ISO 27001 A.9.x 対応。",
     "x-a2-level": "L7",
     "properties": {
@@ -379,9 +380,8 @@ add("AccessControlEvent", {
         "denialReason": {"type": "string"},
         "timestamp": {"type": "string", "format": "date-time"},
         "$signature": {"$ref": "#/$defs/SignatureBundle"}, "$hashChain": {"$ref": "#/$defs/HashChain"}},
-    "required": ["$tag", "id", "eventType", "timestamp"]})
-
-add("GovernanceAttestation", {
+    "required": ["$tag", "id", "eventType", "timestamp"]},
+  "GovernanceAttestation": {
     "type": "object", "$comment": "§10. ガバナンス・ESG 証明。TCFD / CSDDD / 上場企業ESG開示対応。",
     "x-a2-sign-target": True, "x-a2-level": "L8",
     "properties": {
@@ -395,15 +395,16 @@ add("GovernanceAttestation", {
             "ialLevel": {"$ref": "#/$defs/IALLevel"}}},
         "attestedAt": {"type": "string", "format": "date-time"},
         "$signature": {"$ref": "#/$defs/SignatureBundle"}, "$hashChain": {"$ref": "#/$defs/HashChain"}},
-    "required": ["$tag", "id", "attestationType"]})
+    "required": ["$tag", "id", "attestationType"]},
+}
 
 # ---- 3. GV v0.0.9 document ------------------------------------------------------
 gv8 = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": GV_ID,
-    "title": "Grand Vault v0.0.9 — SSoT with Compliance Extensions",
-    "version": "0.0.9",
-    "description": "SSoT with §10 Compliance extensions (GDPR / EU AI Act / SOC 2 / ISO 27001 / HIPAA / PCI DSS / ESG). Purely additive over v0.0.8. All other schemas $ref defs here. Sections §1–§10; scalable to 2500+ DocTypes.",
+    "title": "Grand Vault v0.0.10 — lean SSoT (shared types only)",
+    "version": "0.0.10",
+    "description": "Lean SSoT of SHARED/universal types. GV-lean: compliance-DOMAIN §10 entity defs (ComplianceLog, AccessControlEvent, DataSubjectRequest, IncidentReport, PIIDetection, GovernanceAttestation, DataLineage) live in the compliance PROFILE, not here; only the shared ConsentReceipt + ComplianceFrameworkEnum remain (reused by contract / the core AuditSession). §3 AI-audit (AIAction/Instruction/AuditSession) retains its EU-AI-Act fields. All other schemas $ref defs here.",
     "license": "Apache-2.0",
     "x-a2-role": "ssot",
     "x-a2-deprecation-policy": "Defs marked x-a2-deprecated remain available for 2 minor versions before removal.",
@@ -418,7 +419,7 @@ missing = sorted(r for r in all_local_ref_names(gv8) if r not in nd)
 # Any absolute a2-schema URL ref inside GV is a bug (e.g. stale vault/v0.0.6 refs
 # carried in from the contract module). Flag them so they can never ship silently.
 abs_self_refs = sorted(set(re.findall(r'"\$ref":\s*"(https://a2-schema\.org/[^"]+)"', json.dumps(gv8))))
-print(f"GV v0.0.9 defs: {len(nd)}  (was {len(gd)})  | integrated closure: {len(closure)}")
+print(f"GV v0.0.10 defs: {len(nd)}  (was {len(gd)})  | integrated closure: {len(closure)}")
 print(f"dangling #/$defs refs in GV: {missing or 'NONE ✓'}")
 print(f"absolute a2-schema refs inside GV (must be 0): {abs_self_refs or 'NONE ✓'}")
 assert not abs_self_refs, f"GV contains absolute self-refs (should be local): {abs_self_refs}"
@@ -434,8 +435,8 @@ GV_HASH = "sha256:" + hashlib.sha256(json.dumps(gv8, sort_keys=True, ensure_asci
 # ---- 5. profiles ----------------------------------------------------------------
 sig_profile = {
     "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": SIG_ID,
-    "title": "Signature Profile v0.0.2", "version": "0.0.2",
-    "description": "Profile selecting signature-related defs from Grand Vault v0.0.9. NO own def bodies — pure $ref aggregator.",
+    "title": "Signature Profile v0.0.3", "version": "0.0.3",
+    "description": "Profile selecting signature-related defs from Grand Vault v0.0.10. NO own def bodies — pure $ref aggregator.",
     "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_ID,
     "$defs": {"SignatureNode": {"oneOf": [
         {"$ref": GVREF + "BlockSignature"}, {"$ref": GVREF + "HandwrittenSignature"},
@@ -447,10 +448,10 @@ sig_profile = {
 }
 ct_profile = {
     "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": CT_ID,
-    "title": "Contract Profile v0.1.8", "version": "0.1.8",
-    "description": "Profile selecting contract-related defs from Grand Vault v0.0.9. References Signature Profile + contract primitives. Adds ContractConsentReceipt (ESIGN disclosure).",
+    "title": "Contract Profile v0.1.9", "version": "0.1.9",
+    "description": "Profile selecting contract-related defs from Grand Vault v0.0.10. References Signature Profile + contract primitives. Adds ContractConsentReceipt (ESIGN disclosure; composes GV ConsentReceipt).",
     "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_ID,
-    "x-a2-depends-on": ["signature-profile-v0.0.2"],
+    "x-a2-depends-on": ["signature-profile-v0.0.3"],
     "$defs": {
         "ContractRoot": {"type": "object", "properties": {
             "$tag": {"const": "Contract"}, "id": {"$ref": GVREF + "NodeIdType"},
@@ -470,19 +471,21 @@ ct_profile = {
         "PartySignatureStateEnum", "ContractSigningCeremony", "HandwrittenContractSignature",
         "ConsentReceipt"],
 }
+# body-owning compliance domain profile (GV-lean): owns the §10 entity defs; their local #/$defs
+# refs are rewritten to absolute GV refs (all referenced types — NodeIdType/SignatureBundle/HashChain/
+# ConfidenceType/IAL·AAL/ComplianceFrameworkEnum — are GV-resident shared types; none ref each other).
+_comp_owned = json.loads(json.dumps(COMPLIANCE_PROFILE_DEFS).replace('"#/$defs/', '"' + GVREF))
 comp_profile = {
     "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": COMP_ID,
-    "title": "Compliance Profile v0.0.1", "version": "0.0.1",
-    "description": "Profile selecting compliance-related defs from Grand Vault v0.0.9. References §10 Compliance + §3 AI Audit. NO own def bodies — pure $ref aggregator.",
+    "title": "Compliance Profile v0.0.2 — body-owning (GV-lean)", "version": "0.0.2",
+    "description": "Body-owning compliance DOMAIN profile (GV-lean): owns the §10 compliance entity defs (ComplianceLog, AccessControlEvent, DataSubjectRequest, IncidentReport, PIIDetection, GovernanceAttestation, DataLineage) and $refs Grand Vault v0.0.10 for shared types (NodeIdType/SignatureBundle/HashChain/ConfidenceType/IAL·AAL/ComplianceFrameworkEnum) + ConsentReceipt/AIAction. These domain defs are NOT in GV.",
     "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_ID,
-    "$defs": {"ComplianceEvent": {"oneOf": [
-        {"$ref": GVREF + "ComplianceLog"}, {"$ref": GVREF + "AccessControlEvent"},
-        {"$ref": GVREF + "ConsentReceipt"}, {"$ref": GVREF + "DataSubjectRequest"},
-        {"$ref": GVREF + "IncidentReport"}, {"$ref": GVREF + "PIIDetection"},
-        {"$ref": GVREF + "GovernanceAttestation"}, {"$ref": GVREF + "AIAction"}]}},
-    "x-a2-included-defs": ["ComplianceLog", "ComplianceFrameworkEnum", "ConsentReceipt", "DataLineage",
-        "DataSubjectRequest", "IncidentReport", "AccessControlEvent", "PIIDetection",
-        "GovernanceAttestation", "AIAction", "Instruction", "AuditSession"],
+    "$defs": {**_comp_owned, "ComplianceEvent": {"oneOf": [
+        {"$ref": "#/$defs/ComplianceLog"}, {"$ref": "#/$defs/AccessControlEvent"},
+        {"$ref": GVREF + "ConsentReceipt"}, {"$ref": "#/$defs/DataSubjectRequest"},
+        {"$ref": "#/$defs/IncidentReport"}, {"$ref": "#/$defs/PIIDetection"},
+        {"$ref": "#/$defs/GovernanceAttestation"}, {"$ref": GVREF + "AIAction"}]}},
+    "x-a2-included-defs": ["ConsentReceipt", "ComplianceFrameworkEnum", "AIAction", "Instruction", "AuditSession"],
 }
 
 # profile $ref + included-defs must resolve to GV defs
