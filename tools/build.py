@@ -24,12 +24,14 @@ DX = os.environ.get("A2_DX_ROOT", os.path.expanduser("~/Documents/Business/dx-pl
 # every $id / $ref resolves directly once the domain is live.
 OUT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 DOMAIN = "https://a2-schema.org/"
-GV_ID = DOMAIN + "vault/v0.0.10/schema.json"
+GV_ID = DOMAIN + "vault/v0.0.11/schema.json"          # vault OUTPUT (v0.0.11 — additive: + OperationLog)
+GV_REF_ID = DOMAIN + "vault/v0.0.10/schema.json"      # profiles STAY pinned to the frozen v0.0.10 (they don't
+                                                      # use OperationLog → zero needless churn; v0.0.10 ⊂ v0.0.11)
 SIG_ID = DOMAIN + "profiles/signature/v0.0.3/schema.json"
 CT_ID = DOMAIN + "profiles/contract/v0.1.9/schema.json"
 COMP_ID = DOMAIN + "profiles/compliance/v0.0.2/schema.json"
 TIER_META_ID = DOMAIN + "tier-configs/_meta/v0.1.0/schema.json"   # meta-schema describing tier configs (under tier-configs/)
-GVREF = GV_ID + "#/$defs/"
+GVREF = GV_REF_ID + "#/$defs/"                        # profiles $ref the pinned GV (v0.0.10), NOT the new output
 
 gv = json.load(open(f"{DX}/xml/ichiriXML/a2_grand_vault_v_00_00_07.schema.json"))
 ct = json.load(open(f"{DX}/xml/ichiriXML/a2-schema_module_schema/contract/a2_contract_module_v_00_01_06.schema.json"))
@@ -227,6 +229,42 @@ ases["complianceFrameworks"] = {"type": "array",
     "items": {"$ref": "#/$defs/ComplianceFrameworkEnum"},
     "$comment": "⭐ NEW このセッションに適用される Compliance フレームワーク。"}
 
+# ---- 2b'. §3 Operation Audit — universal per-operation log (NEW in GV v0.0.11) ---
+# The SHARED audit primitive every a2 app reuses: ONE application operation by one
+# actor, with its identity assurance (IAL/AAL/FAL) and result. Signable + hash-
+# chained → tamper-evident, verifiable later. This is what lets a deployment claim
+# "every operation is recorded and can be verified afterwards". `operation` is a
+# FREE STRING (app-defined) on purpose — an enum would force a GV bump per new
+# action (update-hell). GV-lean: it's a universal type, so it belongs in GV (not a
+# domain profile). PURELY ADDITIVE over v0.0.10.
+section("_____S3_OPERATION_AUDIT_____", "─── §3 Operation Audit (universal per-operation log) ───")
+add("OperationLog", {
+    "type": "object",
+    "$comment": "§3. Universal operation-audit record (GV v0.0.11): one application operation by one actor, "
+                "with identity assurance (IAL/AAL/FAL) and result. Signable + hash-chained → tamper-evident, "
+                "verifiable later. Reused by every a2 app (sign/verify/view/grant/revoke/login…).",
+    "x-a2-sign-target": True, "x-a2-level": "L3",
+    "properties": {
+        "$tag": {"const": "OperationLog"},
+        "id": {"$ref": "#/$defs/NodeIdType"},
+        "operation": {"type": "string",
+            "$comment": "what was done (app-defined free string; e.g. sign, verify, view, create, update, "
+                        "delete, grant, revoke, login, logout, export, configure)"},
+        "actorId": {"type": "string", "$comment": "who performed it (subject/email/uid URI)"},
+        "onBehalfOf": {"type": "string", "$comment": "delegation/agency: the principal the actor acted for"},
+        "resourceId": {"type": "string", "$comment": "the document / PoA / record operated on"},
+        "result": {"enum": ["success", "failure", "denied"]},
+        "reason": {"type": "string", "$comment": "failure/denial reason"},
+        "ialLevel": {"$ref": "#/$defs/IALLevel"},
+        "aalLevel": {"$ref": "#/$defs/AALLevel"},
+        "falLevel": {"$ref": "#/$defs/FALLevel"},
+        "ipAddress": {"type": "string"},
+        "userAgent": {"type": "string"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "$signature": {"$ref": "#/$defs/SignatureBundle"},
+        "$hashChain": {"$ref": "#/$defs/HashChain"}},
+    "required": ["$tag", "id", "operation", "timestamp"]})
+
 # ---- 2c. §10 Compliance (NEW defs) ----------------------------------------------
 section("_____S10_COMPLIANCE_____",
     "─── §10 Compliance: GDPR / EU AI Act / SOC 2 / ISO 27001 / HIPAA / PCI DSS / ESG ───")
@@ -402,9 +440,9 @@ COMPLIANCE_PROFILE_DEFS = {
 gv8 = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": GV_ID,
-    "title": "Grand Vault v0.0.10 — lean SSoT (shared types only)",
-    "version": "0.0.10",
-    "description": "Lean SSoT of SHARED/universal types. GV-lean: compliance-DOMAIN §10 entity defs (ComplianceLog, AccessControlEvent, DataSubjectRequest, IncidentReport, PIIDetection, GovernanceAttestation, DataLineage) live in the compliance PROFILE, not here; only the shared ConsentReceipt + ComplianceFrameworkEnum remain (reused by contract / the core AuditSession). §3 AI-audit (AIAction/Instruction/AuditSession) retains its EU-AI-Act fields. All other schemas $ref defs here.",
+    "title": "Grand Vault v0.0.11 — lean SSoT (shared types only)",
+    "version": "0.0.11",
+    "description": "Lean SSoT of SHARED/universal types. v0.0.11 is PURELY ADDITIVE over v0.0.10: + OperationLog (§3, the universal per-operation audit record — actor + IAL/AAL/FAL + result, signable/hash-chained). GV-lean: compliance-DOMAIN §10 entity defs (ComplianceLog, AccessControlEvent, DataSubjectRequest, IncidentReport, PIIDetection, GovernanceAttestation, DataLineage) live in the compliance PROFILE, not here; only the shared ConsentReceipt + ComplianceFrameworkEnum remain (reused by contract / the core AuditSession). §3 AI-audit (AIAction/Instruction/AuditSession) retains its EU-AI-Act fields. All other schemas $ref defs here.",
     "license": "Apache-2.0",
     "x-a2-role": "ssot",
     "x-a2-deprecation-policy": "Defs marked x-a2-deprecated remain available for 2 minor versions before removal.",
@@ -419,7 +457,7 @@ missing = sorted(r for r in all_local_ref_names(gv8) if r not in nd)
 # Any absolute a2-schema URL ref inside GV is a bug (e.g. stale vault/v0.0.6 refs
 # carried in from the contract module). Flag them so they can never ship silently.
 abs_self_refs = sorted(set(re.findall(r'"\$ref":\s*"(https://a2-schema\.org/[^"]+)"', json.dumps(gv8))))
-print(f"GV v0.0.10 defs: {len(nd)}  (was {len(gd)})  | integrated closure: {len(closure)}")
+print(f"GV v0.0.11 defs: {len(nd)}  (was {len(gd)})  | integrated closure: {len(closure)}")
 print(f"dangling #/$defs refs in GV: {missing or 'NONE ✓'}")
 print(f"absolute a2-schema refs inside GV (must be 0): {abs_self_refs or 'NONE ✓'}")
 assert not abs_self_refs, f"GV contains absolute self-refs (should be local): {abs_self_refs}"
@@ -437,7 +475,7 @@ sig_profile = {
     "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": SIG_ID,
     "title": "Signature Profile v0.0.3", "version": "0.0.3",
     "description": "Profile selecting signature-related defs from Grand Vault v0.0.10. NO own def bodies — pure $ref aggregator.",
-    "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_ID,
+    "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_REF_ID,
     "$defs": {"SignatureNode": {"oneOf": [
         {"$ref": GVREF + "BlockSignature"}, {"$ref": GVREF + "HandwrittenSignature"},
         {"$ref": GVREF + "BiometricCapture"}, {"$ref": GVREF + "SignatureBundle"}]}},
@@ -450,7 +488,7 @@ ct_profile = {
     "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": CT_ID,
     "title": "Contract Profile v0.1.9", "version": "0.1.9",
     "description": "Profile selecting contract-related defs from Grand Vault v0.0.10. References Signature Profile + contract primitives. Adds ContractConsentReceipt (ESIGN disclosure; composes GV ConsentReceipt).",
-    "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_ID,
+    "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_REF_ID,
     "x-a2-depends-on": ["signature-profile-v0.0.3"],
     "$defs": {
         "ContractRoot": {"type": "object", "properties": {
@@ -479,7 +517,7 @@ comp_profile = {
     "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": COMP_ID,
     "title": "Compliance Profile v0.0.2 — body-owning (GV-lean)", "version": "0.0.2",
     "description": "Body-owning compliance DOMAIN profile (GV-lean): owns the §10 compliance entity defs (ComplianceLog, AccessControlEvent, DataSubjectRequest, IncidentReport, PIIDetection, GovernanceAttestation, DataLineage) and $refs Grand Vault v0.0.10 for shared types (NodeIdType/SignatureBundle/HashChain/ConfidenceType/IAL·AAL/ComplianceFrameworkEnum) + ConsentReceipt/AIAction. These domain defs are NOT in GV.",
-    "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_ID,
+    "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_REF_ID,
     "$defs": {**_comp_owned, "ComplianceEvent": {"oneOf": [
         {"$ref": "#/$defs/ComplianceLog"}, {"$ref": "#/$defs/AccessControlEvent"},
         {"$ref": GVREF + "ConsentReceipt"}, {"$ref": "#/$defs/DataSubjectRequest"},
