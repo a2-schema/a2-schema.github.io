@@ -24,9 +24,9 @@ DX = os.environ.get("A2_DX_ROOT", os.path.expanduser("~/Documents/Business/dx-pl
 # every $id / $ref resolves directly once the domain is live.
 OUT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 DOMAIN = "https://a2-schema.org/"
-GV_ID = DOMAIN + "vault/v0.0.11/schema.json"          # vault OUTPUT (v0.0.11 — additive: + OperationLog)
+GV_ID = DOMAIN + "vault/v0.0.12/schema.json"          # vault OUTPUT (v0.0.12 — A2Envelope.$signatures[] multi-party; + OperationLog from v0.0.11)
 GV_REF_ID = DOMAIN + "vault/v0.0.10/schema.json"      # profiles STAY pinned to the frozen v0.0.10 (they don't
-                                                      # use OperationLog → zero needless churn; v0.0.10 ⊂ v0.0.11)
+                                                      # use OperationLog / the doc-level $signatures → zero needless churn; v0.0.10 ⊂ v0.0.12)
 SIG_ID = DOMAIN + "profiles/signature/v0.0.3/schema.json"
 CT_ID = DOMAIN + "profiles/contract/v0.1.9/schema.json"
 COMP_ID = DOMAIN + "profiles/compliance/v0.0.2/schema.json"
@@ -440,9 +440,9 @@ COMPLIANCE_PROFILE_DEFS = {
 gv8 = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": GV_ID,
-    "title": "Grand Vault v0.0.11 — lean SSoT (shared types only)",
-    "version": "0.0.11",
-    "description": "Lean SSoT of SHARED/universal types. v0.0.11 is PURELY ADDITIVE over v0.0.10: + OperationLog (§3, the universal per-operation audit record — actor + IAL/AAL/FAL + result, signable/hash-chained). GV-lean: compliance-DOMAIN §10 entity defs (ComplianceLog, AccessControlEvent, DataSubjectRequest, IncidentReport, PIIDetection, GovernanceAttestation, DataLineage) live in the compliance PROFILE, not here; only the shared ConsentReceipt + ComplianceFrameworkEnum remain (reused by contract / the core AuditSession). §3 AI-audit (AIAction/Instruction/AuditSession) retains its EU-AI-Act fields. All other schemas $ref defs here.",
+    "title": "Grand Vault v0.0.12 — lean SSoT (shared types only)",
+    "version": "0.0.12",
+    "description": "Lean SSoT of SHARED/universal types. v0.0.12 (patch over v0.0.11): the A2Envelope DOCUMENT signature slot is now $signatures (array of BlockSignature) for multi-party signing (甲乙…) — every party signs the same canonical body; single-signer = length 1. BlockSignature gains an optional informative `signer` (per-signer email / party / identityAssurance / signedAt). The per-block single-author $signature on the other defs is UNCHANGED. v0.0.11 added OperationLog (§3). GV-lean: compliance-DOMAIN §10 entity defs (ComplianceLog, AccessControlEvent, DataSubjectRequest, IncidentReport, PIIDetection, GovernanceAttestation, DataLineage) live in the compliance PROFILE, not here; only the shared ConsentReceipt + ComplianceFrameworkEnum remain (reused by contract / the core AuditSession). §3 AI-audit (AIAction/Instruction/AuditSession) retains its EU-AI-Act fields. All other schemas $ref defs here.",
     "license": "Apache-2.0",
     "x-a2-role": "ssot",
     "x-a2-deprecation-policy": "Defs marked x-a2-deprecated remain available for 2 minor versions before removal.",
@@ -457,7 +457,7 @@ missing = sorted(r for r in all_local_ref_names(gv8) if r not in nd)
 # Any absolute a2-schema URL ref inside GV is a bug (e.g. stale vault/v0.0.6 refs
 # carried in from the contract module). Flag them so they can never ship silently.
 abs_self_refs = sorted(set(re.findall(r'"\$ref":\s*"(https://a2-schema\.org/[^"]+)"', json.dumps(gv8))))
-print(f"GV v0.0.11 defs: {len(nd)}  (was {len(gd)})  | integrated closure: {len(closure)}")
+print(f"GV v0.0.12 defs: {len(nd)}  (was {len(gd)})  | integrated closure: {len(closure)}")
 print(f"dangling #/$defs refs in GV: {missing or 'NONE ✓'}")
 print(f"absolute a2-schema refs inside GV (must be 0): {abs_self_refs or 'NONE ✓'}")
 assert not abs_self_refs, f"GV contains absolute self-refs (should be local): {abs_self_refs}"
