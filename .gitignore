@@ -2,3 +2,6 @@
 # Public surface = Grand Vault + profiles only. See README "Tier configs — not published".
 /tier-config/
 /tier-configs/
+# Retargeted tier configs for the github.io profile model (owner ruling 2026-06-29):
+# tier files are our proprietary method, NOT OSS — never published.
+/tiers/
