@@ -1124,6 +1124,10 @@
         }
       }
     },
+    "_____S8_CONTRACT_PRIMITIVES_____": {
+      "description": "─── §8 Contract Primitives (integrated from contract module) ───",
+      "x-a2-section": true
+    },
     "ContractRoot": {
       "type": "object",
       "properties": {

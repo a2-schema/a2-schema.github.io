@@ -1628,13 +1628,15 @@
       "description": "PERMITTED USE ONLY. (a) Sealed payloads, (b) legally mandated original-form XML, (c) binary blobs."
     },
     "SignatureAlgorithmType": {
-      "type": "string",
-      "enum": [
-        "ML-DSA-65",
-        "ES256",
-        "RS3072"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MLDSAAlgorithmEnum"
+        },
+        {
+          "$ref": "#/$defs/LegacySignatureAlgEnum"
+        }
       ],
-      "description": "G19. Accepted signature algorithm — exactly the algorithms a2-sign (GCP KMS) can sign AND verify. ML-DSA-65 = FIPS 204 post-quantum (recommended). ES256 = ECDSA P-256/SHA-256. RS3072 = RSA-3072 PKCS#1 v1.5/SHA-256 (KMS key RSA_SIGN_PKCS1_3072_SHA256; the bare JOSE 'RS256' label is wrong/absent). No other JOSE/ML-DSA variant has a backing key, so none is accepted (keeps schema, signer, and UI in lockstep)."
+      "description": "G19. Accepted signature algorithm: ML-DSA (post-quantum) or legacy JOSE. ML-DSA-65 recommended for new a2-schema documents."
     },
     "MLDSAAlgorithmEnum": {
       "type": "string",
@@ -1647,6 +1649,22 @@
       "x-a2-spec": "G19",
       "x-nist": "FIPS 204",
       "x-ietf": "draft-ietf-jose-post-quantum-algorithms"
+    },
+    "LegacySignatureAlgEnum": {
+      "type": "string",
+      "enum": [
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "EdDSA",
+        "PS256",
+        "PS384",
+        "PS512"
+      ],
+      "description": "Legacy JOSE signature algorithms (RFC 7518) for backward compatibility. Prefer ML-DSA-* for new documents. EdDSA covers Ed25519/Ed448."
     },
     "JAdESProfileEnum": {
       "type": "string",
@@ -2790,7 +2808,7 @@
           "items": {
             "$ref": "#/$defs/BlockSignature"
           },
-          "description": "One or more signatures over the canonical envelope (RFC 8785 JCS) — multi-party (甲乙…). Each element signs the same body (signature array excluded from the payload); single-signer = length 1. Replaces the former single $signature on the document root."
+          "description": "One or more signatures over the canonical envelope (RFC 8785 JCS) — multi-party (甲乙…). Each element signs the same body (the signature array is excluded from the payload); single-signer = length 1. Replaces the former single $signature on the document root (v0.0.12)."
         },
         "chain": {
           "$ref": "#/$defs/HashChain",
@@ -2816,7 +2834,7 @@
       "properties": {
         "algorithm": {
           "$ref": "#/$defs/SignatureAlgorithmType",
-          "description": "Signature algorithm id — one of the backend-signable set (ML-DSA-65, ES256, RS3072). RS3072 = RSA-3072 PKCS#1 v1.5/SHA-256 (the KMS key); there is no 'RS256' key and no RSA-PSS/'PS256' key. The RSA key size lives in keyRef."
+          "description": "JOSE signature alg id (scheme+hash) — NOT a key size. UI labels: Ed25519='EdDSA', ML-DSA-65, RSA-4096='PS256' (RSA-PSS; the 4096 is the key size, in keyRef)."
         },
         "keyRef": {
           "type": "string",

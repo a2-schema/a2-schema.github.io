@@ -439,6 +439,19 @@ COMPLIANCE_PROFILE_DEFS = {
     "required": ["$tag", "id", "attestationType"]},
 }
 
+# ---- 2d. LOSSLESS extraction (BINDING — docs/schema-architecture.md §A.1.1) ------
+# v0.0.13 = the FROZEN v0.0.12 with ONLY the contract DOMAIN defs relocated to the
+# Contract profile. We derive from v0.0.12 (NOT the drifted source build above) so every
+# SHARED def is byte-identical and the only change is the contract relocation — no
+# unrelated drift (e.g. the SignatureAlgorithmType tightening) rides in this patch.
+# Composed (this GV + Contract profile) then reproduces v0.0.12 byte-for-byte; the gate is
+# tools/composed_lossless_test.py.
+_V12 = json.load(open(os.path.join(OUT, "vault/v0.0.12/schema.json"), encoding="utf-8"))["$defs"]
+_CONTRACT_NAMES = set(_CT_OWNED_RAW)                 # the §8 contract closure + ceremony wrappers
+_S8_MARKER = "_____S8_CONTRACT_PRIMITIVES_____"
+# GV0.0.13 $defs = v0.0.12 SHARED defs only (byte-identical; contract + §8 marker removed)
+nd = {k: v for k, v in _V12.items() if k not in _CONTRACT_NAMES and k != _S8_MARKER}
+
 # ---- 3. GV v0.0.9 document ------------------------------------------------------
 gv8 = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -498,7 +511,12 @@ def _ct_place(body):
         x = m.group(1)
         return '"$ref": "#/$defs/%s"' % x if x in _CT_OWNED else '"$ref": "%s%s"' % (GVREF, x)
     return json.loads(re.sub(r'"\$ref":\s*"#/\$defs/([A-Za-z0-9_]+)"', repl, json.dumps(body)))
-_ct_owned = {k: _ct_place(v) for k, v in _CT_OWNED_RAW.items()}
+# LOSSLESS: take the contract def BODIES from the FROZEN v0.0.12 (byte-identical), with
+# refs to SHARED types rewritten to GV refs (contract-internal refs stay local). After the
+# composer localizes them back, they reproduce v0.0.12 exactly. Carry the §8 marker too.
+_ct_owned = {n: _ct_place(_V12[n]) for n in _CT_OWNED_RAW if n in _V12}
+if _S8_MARKER in _V12:
+    _ct_owned[_S8_MARKER] = _V12[_S8_MARKER]
 _ct_defs = {
     **_ct_owned,
     "ContractRoot": {"type": "object", "properties": {
