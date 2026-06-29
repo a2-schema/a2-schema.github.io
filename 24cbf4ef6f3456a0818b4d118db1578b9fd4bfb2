@@ -1,0 +1,1 @@
+⚠ 動作しないバグ版（非 lossless）。GV v0.0.13 が SignatureAlgorithmType/LegacySignatureAlgEnum/A2Envelope/A2SigningRecipe で v0.0.12 と不一致。commit 689eac5 で修正（true lossless）。
