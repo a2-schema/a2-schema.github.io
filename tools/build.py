@@ -24,11 +24,11 @@ DX = os.environ.get("A2_DX_ROOT", os.path.expanduser("~/Documents/Business/dx-pl
 # every $id / $ref resolves directly once the domain is live.
 OUT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 DOMAIN = "https://a2-schema.org/"
-GV_ID = DOMAIN + "vault/v0.0.12/schema.json"          # vault OUTPUT (v0.0.12 — A2Envelope.$signatures[] multi-party; + OperationLog from v0.0.11)
-GV_REF_ID = DOMAIN + "vault/v0.0.10/schema.json"      # profiles STAY pinned to the frozen v0.0.10 (they don't
-                                                      # use OperationLog / the doc-level $signatures → zero needless churn; v0.0.10 ⊂ v0.0.12)
+GV_ID = DOMAIN + "vault/v0.0.13/schema.json"          # vault OUTPUT (v0.0.13 — GV-lean FIX: §8 Contract primitives REMOVED from GV → moved to the Contract profile; lean common core only)
+GV_REF_ID = DOMAIN + "vault/v0.0.10/schema.json"      # profiles STAY pinned to the frozen v0.0.10 for SHARED types (they don't
+                                                      # use OperationLog / the doc-level $signatures → zero needless churn; v0.0.10 ⊂ v0.0.13)
 SIG_ID = DOMAIN + "profiles/signature/v0.0.3/schema.json"
-CT_ID = DOMAIN + "profiles/contract/v0.1.9/schema.json"
+CT_ID = DOMAIN + "profiles/contract/v0.1.10/schema.json"
 COMP_ID = DOMAIN + "profiles/compliance/v0.0.2/schema.json"
 TIER_META_ID = DOMAIN + "tier-configs/_meta/v0.1.0/schema.json"   # meta-schema describing tier configs (under tier-configs/)
 GVREF = GV_REF_ID + "#/$defs/"                        # profiles $ref the pinned GV (v0.0.10), NOT the new output
@@ -155,24 +155,27 @@ add("SigningCeremony", {
         "$signature": {"$ref": "#/$defs/SignatureBundle"}, "$hashChain": {"$ref": "#/$defs/HashChain"}},
     "required": ["$tag", "id", "ceremonyType", "participants"]})
 
-# §8 Contract Primitives (integrate the 22-def closure, renamed seeds)
-section("_____S8_CONTRACT_PRIMITIVES_____", "─── §8 Contract Primitives (integrated from contract module) ───")
-for name in sorted(closure):
-    nd[RENAME.get(name, name)] = integrate_contract(name)
-add("ContractSigningCeremony", {
+# §8 Contract Primitives — GV-lean FIX (2026-06-25): contract-DOMAIN defs do NOT live in
+# GV (they bloated the "lean SSoT" — owner ruling). They are now body-owned by the Contract
+# PROFILE, mirroring the §10 compliance pattern. We build the RAW bodies here (closure
+# renamed + the two contract-ceremony wrappers, with local #/$defs refs) and place them into
+# the contract profile below — refs to GV-resident SHARED types are rewritten to absolute GV
+# refs there; contract-internal refs stay local. NOTHING contract is added to GV (`nd`).
+_CT_OWNED_RAW = {RENAME.get(name, name): integrate_contract(name) for name in sorted(closure)}
+_CT_OWNED_RAW["ContractSigningCeremony"] = {
     "type": "object", "$comment": "§8. Contract signing ceremony — extends SigningCeremony.",
     "allOf": [{"$ref": "#/$defs/SigningCeremony"}],
     "properties": {
         "$tag": {"const": "ContractSigningCeremony"}, "contractId": {"type": "string"},
         "jurisdiction": {"type": "string"},
         "applicableLaw": {"type": "string", "enum": ["US ESIGN", "JP 電子署名法", "EU eIDAS", "UNCITRAL"]},
-        "esIgnConsent": {"$ref": "#/$defs/ConsentToESign"}}})
-add("HandwrittenContractSignature", {
+        "esIgnConsent": {"$ref": "#/$defs/ConsentToESign"}}}
+_CT_OWNED_RAW["HandwrittenContractSignature"] = {
     "type": "object", "$comment": "§8. Contract wrapper around HandwrittenSignature.",
     "properties": {
         "$tag": {"const": "HandwrittenContractSignature"},
         "handwriting": {"$ref": "#/$defs/HandwrittenSignature"},
-        "clauseId": {"type": "string"}, "agreementText": {"type": "string"}}})
+        "clauseId": {"type": "string"}, "agreementText": {"type": "string"}}}
 
 # §9 reserved
 section("_____S9_FUTURE_DOC_TYPES_____", "─── §9 Reserved for future modules (Medical, Robot, Life …) ───")
@@ -440,9 +443,9 @@ COMPLIANCE_PROFILE_DEFS = {
 gv8 = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": GV_ID,
-    "title": "Grand Vault v0.0.12 — lean SSoT (shared types only)",
-    "version": "0.0.12",
-    "description": "Lean SSoT of SHARED/universal types. v0.0.12 (patch over v0.0.11): the A2Envelope DOCUMENT signature slot is now $signatures (array of BlockSignature) for multi-party signing (甲乙…) — every party signs the same canonical body; single-signer = length 1. BlockSignature gains an optional informative `signer` (per-signer email / party / identityAssurance / signedAt). The per-block single-author $signature on the other defs is UNCHANGED. v0.0.11 added OperationLog (§3). GV-lean: compliance-DOMAIN §10 entity defs (ComplianceLog, AccessControlEvent, DataSubjectRequest, IncidentReport, PIIDetection, GovernanceAttestation, DataLineage) live in the compliance PROFILE, not here; only the shared ConsentReceipt + ComplianceFrameworkEnum remain (reused by contract / the core AuditSession). §3 AI-audit (AIAction/Instruction/AuditSession) retains its EU-AI-Act fields. All other schemas $ref defs here.",
+    "title": "Grand Vault v0.0.13 — lean SSoT (shared types only)",
+    "version": "0.0.13",
+    "description": "Lean SSoT of SHARED/universal types. v0.0.13 (patch over v0.0.12) — GV-lean FIX: the §8 Contract PRIMITIVES (ContractParty/ContractClause/PartyAddress/PartyContact/PartyIdentifier/PartyRoleEnum/PartyTypeEnum/PartySignatureStateEnum/SignatoryBlock/ClauseTypeEnum/ConsentToESign/USESIGNCompliance/RedlineAction/RedlineActionEnum/SigningCeremonyEvidence/ContractSigningCeremony/HandwrittenContractSignature) were WRONGLY folded into GV; they are a contract DOMAIN concern and are now body-owned by the Contract PROFILE (mirrors the §10 compliance fix). GV keeps only shared types (A2Envelope, BlockSignature, SignatureBundle, HashChain, SigningCeremony, HandwrittenSignature, OperationLog, ConsentReceipt, ComplianceFrameworkEnum, the §3 AI-audit AIAction/Instruction/AuditSession, …). Composed (this GV + Contract profile) reproduces the full v0.0.12 def set (lossless). v0.0.12 carried A2Envelope.$signatures[] multi-party + per-signer `signer`; v0.0.11 added OperationLog (§3). All other schemas $ref defs here.",
     "license": "Apache-2.0",
     "x-a2-role": "ssot",
     "x-a2-deprecation-policy": "Defs marked x-a2-deprecated remain available for 2 minor versions before removal.",
@@ -457,7 +460,7 @@ missing = sorted(r for r in all_local_ref_names(gv8) if r not in nd)
 # Any absolute a2-schema URL ref inside GV is a bug (e.g. stale vault/v0.0.6 refs
 # carried in from the contract module). Flag them so they can never ship silently.
 abs_self_refs = sorted(set(re.findall(r'"\$ref":\s*"(https://a2-schema\.org/[^"]+)"', json.dumps(gv8))))
-print(f"GV v0.0.12 defs: {len(nd)}  (was {len(gd)})  | integrated closure: {len(closure)}")
+print(f"GV v0.0.13 defs: {len(nd)}  (was {len(gd)})  | contract closure → Contract profile (NOT GV): {len(closure)}")
 print(f"dangling #/$defs refs in GV: {missing or 'NONE ✓'}")
 print(f"absolute a2-schema refs inside GV (must be 0): {abs_self_refs or 'NONE ✓'}")
 assert not abs_self_refs, f"GV contains absolute self-refs (should be local): {abs_self_refs}"
@@ -484,30 +487,44 @@ sig_profile = {
         "JCSCanonicalizationEnum", "JWSProtectedHeaderDecoded", "BlockSignature", "SignatureBundle",
         "HandwrittenSignature", "BiometricCapture", "BiometricTypeEnum"],
 }
+# Contract profile body-owning (GV-lean FIX): place the §8 contract defs in the PROFILE.
+# Contract defs reference EACH OTHER, so rewrite selectively: a #/$defs/X ref to another
+# contract-owned def stays LOCAL; a ref to a GV-resident SHARED type (X not contract-owned)
+# becomes an absolute GV ref. (Compliance could blanket-rewrite because its defs don't ref
+# each other; contract cannot.)
+_CT_OWNED = set(_CT_OWNED_RAW)
+def _ct_place(body):
+    def repl(m):
+        x = m.group(1)
+        return '"$ref": "#/$defs/%s"' % x if x in _CT_OWNED else '"$ref": "%s%s"' % (GVREF, x)
+    return json.loads(re.sub(r'"\$ref":\s*"#/\$defs/([A-Za-z0-9_]+)"', repl, json.dumps(body)))
+_ct_owned = {k: _ct_place(v) for k, v in _CT_OWNED_RAW.items()}
+_ct_defs = {
+    **_ct_owned,
+    "ContractRoot": {"type": "object", "properties": {
+        "$tag": {"const": "Contract"}, "id": {"$ref": GVREF + "NodeIdType"},
+        "parties": {"type": "array", "items": {"$ref": "#/$defs/ContractParty"}},
+        "clauses": {"type": "array", "items": {"$ref": "#/$defs/ContractClause"}},
+        "signingCeremony": {"$ref": "#/$defs/ContractSigningCeremony"},
+        "$signature": {"$ref": SIG_ID + "#/$defs/SignatureNode"},
+        "$hashChain": {"$ref": GVREF + "HashChain"}}},
+    "ContractConsentReceipt": {
+        "$comment": "Contract-specific ConsentReceipt (ESIGN disclosure). Composes GV ConsentReceipt.",
+        "allOf": [{"$ref": GVREF + "ConsentReceipt"}],
+        "properties": {
+            "contractId": {"type": "string"},
+            "esIgnDisclosure": {"$ref": "#/$defs/ConsentToESign"}}},
+}
+# GV SHARED types this profile references (for x-a2-included-defs + validation).
+_ct_gv_refs = sorted(set(re.findall(re.escape(GVREF) + r'([A-Za-z0-9_]+)', json.dumps(_ct_defs))))
 ct_profile = {
     "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": CT_ID,
-    "title": "Contract Profile v0.1.9", "version": "0.1.9",
-    "description": "Profile selecting contract-related defs from Grand Vault v0.0.10. References Signature Profile + contract primitives. Adds ContractConsentReceipt (ESIGN disclosure; composes GV ConsentReceipt).",
+    "title": "Contract Profile v0.1.10", "version": "0.1.10",
+    "description": "Body-owning Contract DOMAIN profile (GV-lean, 2026-06-25): OWNS the contract primitives (ContractParty/ContractClause/PartyAddress/PartyContact/PartyIdentifier/PartyRoleEnum/PartyTypeEnum/PartySignatureStateEnum/SignatoryBlock/ClauseTypeEnum/ConsentToESign/USESIGNCompliance/RedlineAction/RedlineActionEnum/SigningCeremonyEvidence/ContractSigningCeremony/HandwrittenContractSignature) — moved OUT of GV in v0.0.13 — plus ContractRoot + ContractConsentReceipt. $refs Grand Vault v0.0.10 for SHARED types and the Signature profile for SignatureNode. Composed (GV v0.0.13 + this profile) reproduces the old GV v0.0.12 def set (lossless).",
     "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_REF_ID,
     "x-a2-depends-on": ["signature-profile-v0.0.3"],
-    "$defs": {
-        "ContractRoot": {"type": "object", "properties": {
-            "$tag": {"const": "Contract"}, "id": {"$ref": GVREF + "NodeIdType"},
-            "parties": {"type": "array", "items": {"$ref": GVREF + "ContractParty"}},
-            "clauses": {"type": "array", "items": {"$ref": GVREF + "ContractClause"}},
-            "signingCeremony": {"$ref": GVREF + "ContractSigningCeremony"},
-            "$signature": {"$ref": SIG_ID + "#/$defs/SignatureNode"},
-            "$hashChain": {"$ref": GVREF + "HashChain"}}},
-        "ContractConsentReceipt": {
-            "$comment": "Contract-specific ConsentReceipt (ESIGN disclosure). Composes GV ConsentReceipt.",
-            "allOf": [{"$ref": GVREF + "ConsentReceipt"}],
-            "properties": {
-                "contractId": {"type": "string"},
-                "esIgnDisclosure": {"$ref": GVREF + "ConsentToESign"}}}},
-    "x-a2-included-defs": ["ContractParty", "ContractClause", "ConsentToESign", "USESIGNCompliance",
-        "SignatoryBlock", "SigningCeremonyEvidence", "RedlineAction", "RedlineActionEnum",
-        "PartySignatureStateEnum", "ContractSigningCeremony", "HandwrittenContractSignature",
-        "ConsentReceipt"],
+    "$defs": _ct_defs,
+    "x-a2-included-defs": _ct_gv_refs,
 }
 # body-owning compliance domain profile (GV-lean): owns the §10 entity defs; their local #/$defs
 # refs are rewritten to absolute GV refs (all referenced types — NodeIdType/SignatureBundle/HashChain/
@@ -530,6 +547,9 @@ comp_profile = {
 def check_profile(p):
     bad = [r for r in re.findall(re.escape(GVREF) + r'([A-Za-z0-9_]+)', json.dumps(p)) if r not in nd]
     bad += [d for d in p.get("x-a2-included-defs", []) if d not in nd]
+    # LOCAL #/$defs refs must resolve within the profile's OWN $defs (body-owning profiles).
+    own = set(p.get("$defs", {}))
+    bad += ["#/$defs/" + r for r in re.findall(r'"#/\$defs/([A-Za-z0-9_]+)"', json.dumps(p.get("$defs", {}))) if r not in own]
     return sorted(set(bad))
 print("signature-profile unresolved:", check_profile(sig_profile) or "NONE ✓")
 print("contract-profile  unresolved:", check_profile(ct_profile) or "NONE ✓")
