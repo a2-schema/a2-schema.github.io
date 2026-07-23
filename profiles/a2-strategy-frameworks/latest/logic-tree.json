@@ -1,0 +1,36 @@
+{
+  "profile": "logic-tree@1",
+  "title": "ロジックツリー（課題分解）",
+  "description": "課題を MECE に分解し、主要因と打ち手を対応付ける。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "issue",
+        "title": "課題の定義",
+        "description": "解くべき課題の明確化（What/Where）",
+        "needs": [
+          "解決したい課題",
+          "課題の大きさ・影響"
+        ]
+      },
+      {
+        "key": "causes",
+        "title": "要因分解（Why）",
+        "description": "課題の原因を MECE に分解",
+        "needs": [
+          "考えられる原因",
+          "原因ごとの事実・データ"
+        ]
+      },
+      {
+        "key": "solutions",
+        "title": "打ち手（How）",
+        "description": "主要因に対応する解決策と優先順位"
+      }
+    ],
+    "prompt": "分解は MECE を意識し、根拠（事実・データ）のある要因を主要因として特定してから、打ち手を要因に1対1で対応付ける。打ち手には効果×実行容易性の優先順位を付ける。"
+  }
+}

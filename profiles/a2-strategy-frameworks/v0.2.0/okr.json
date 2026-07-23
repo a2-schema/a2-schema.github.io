@@ -1,0 +1,36 @@
+{
+  "profile": "okr@1",
+  "title": "OKR",
+  "description": "野心的な目標(O)と計測可能な成果指標(KR)、それを動かす施策を設計する。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "objective",
+        "title": "Objective（目標）",
+        "description": "定性的で野心的な目標（四半期〜半期）",
+        "needs": [
+          "この期間で成し遂げたいこと",
+          "事業の最重要課題"
+        ]
+      },
+      {
+        "key": "key-results",
+        "title": "Key Results（成果指標）",
+        "description": "達成を計測できる数値目標 2〜4個",
+        "needs": [
+          "現状の数値（ベースライン）",
+          "目標とすべき水準"
+        ]
+      },
+      {
+        "key": "initiatives",
+        "title": "施策（Initiatives）",
+        "description": "KR を動かす具体的な行動"
+      }
+    ],
+    "prompt": "O は定性的で覚えられる一文に。KR は必ず数値（現状値→目標値）で 2〜4 個。initiatives は各 KR に対応付ける。現状値が無い KR は missing に挙げる。"
+  }
+}

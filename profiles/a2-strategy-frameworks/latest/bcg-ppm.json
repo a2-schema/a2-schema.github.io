@@ -1,0 +1,38 @@
+{
+  "profile": "bcg-ppm@1",
+  "title": "BCG マトリクス（PPM）",
+  "description": "市場成長率×相対シェアで事業・製品を分類し資源配分を決める。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "star",
+        "title": "花形 (Star)",
+        "description": "高成長×高シェア: 投資して伸ばす",
+        "needs": [
+          "事業・製品ラインの一覧",
+          "各事業の市場成長率",
+          "各事業の相対シェア・収益"
+        ]
+      },
+      {
+        "key": "cash-cow",
+        "title": "金のなる木 (Cash Cow)",
+        "description": "低成長×高シェア: 収穫して原資にする"
+      },
+      {
+        "key": "question-mark",
+        "title": "問題児 (Question Mark)",
+        "description": "高成長×低シェア: 選別投資か撤退か"
+      },
+      {
+        "key": "dog",
+        "title": "負け犬 (Dog)",
+        "description": "低成長×低シェア: 撤退・縮小を検討"
+      }
+    ],
+    "prompt": "各事業・製品を根拠（成長率・シェア・収益）付きで4象限に分類し、象限ごとに資源配分方針（投資/維持/収穫/撤退）を提案する。分類根拠が無い事業は missing に挙げる。"
+  }
+}

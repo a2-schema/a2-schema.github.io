@@ -1,0 +1,36 @@
+{
+  "profile": "value-chain@1",
+  "title": "バリューチェーン分析",
+  "description": "価値がどこで生まれどこにコストがかかるかを活動単位で分析する。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "primary",
+        "title": "主活動",
+        "description": "購買物流→製造/オペレーション→出荷物流→販売・マーケ→サービス",
+        "needs": [
+          "事業の主活動の流れ",
+          "各活動のコスト・人員のかかり方"
+        ]
+      },
+      {
+        "key": "support",
+        "title": "支援活動",
+        "description": "全般管理・人事・技術開発・調達",
+        "needs": [
+          "支援活動の体制",
+          "技術開発・調達の強み弱み"
+        ]
+      },
+      {
+        "key": "improvement",
+        "title": "競争優位と改善機会",
+        "description": "価値の源泉・コスト構造から導く打ち手"
+      }
+    ],
+    "prompt": "各活動で「どこで顧客価値が生まれるか」「どこにコストがかかるか」を特定し、improvement で競争優位の源泉と改善機会（強化・外部化・自動化）を結論づける。"
+  }
+}

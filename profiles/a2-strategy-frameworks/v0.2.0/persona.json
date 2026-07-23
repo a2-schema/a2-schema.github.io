@@ -1,0 +1,42 @@
+{
+  "profile": "persona@1",
+  "title": "ペルソナ設計",
+  "description": "実データに基づく1人の具体的な顧客像を設計する。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "profile",
+        "title": "基本属性",
+        "description": "年齢・職業・環境・スキルなどの人物像",
+        "needs": [
+          "実顧客・想定顧客の属性情報"
+        ]
+      },
+      {
+        "key": "needs",
+        "title": "課題・ニーズ",
+        "description": "その人が抱える課題と望む成果",
+        "needs": [
+          "実際に観察された課題・要望"
+        ]
+      },
+      {
+        "key": "behavior",
+        "title": "行動・意思決定",
+        "description": "普段の行動・購買の決め方",
+        "needs": [
+          "情報収集や購買の実際の行動"
+        ]
+      },
+      {
+        "key": "touchpoints",
+        "title": "情報接点",
+        "description": "その人に届くメディア・場所・人"
+      }
+    ],
+    "prompt": "実データ・実顧客の根拠を優先し、想像で補った箇所は必ず（推測）と明記する。複数像に散らさず1人の具体像に絞る。"
+  }
+}

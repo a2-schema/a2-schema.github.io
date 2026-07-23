@@ -1,0 +1,85 @@
+{
+  "profile": "bmc@1",
+  "title": "ビジネスモデルキャンバス",
+  "description": "9ブロックで事業モデル全体の整合を設計・検証する。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "customer-segments",
+        "title": "顧客セグメント",
+        "description": "誰に価値を届けるか",
+        "needs": [
+          "主要な顧客セグメント"
+        ]
+      },
+      {
+        "key": "value-propositions",
+        "title": "価値提案",
+        "description": "どんな価値を提供するか",
+        "needs": [
+          "顧客の課題と提供価値"
+        ]
+      },
+      {
+        "key": "channels",
+        "title": "チャネル",
+        "description": "どう届けるか",
+        "needs": [
+          "認知〜提供〜アフターの経路"
+        ]
+      },
+      {
+        "key": "customer-relationships",
+        "title": "顧客との関係",
+        "description": "獲得・維持・拡大の関係性",
+        "needs": [
+          "獲得・維持の方法"
+        ]
+      },
+      {
+        "key": "revenue-streams",
+        "title": "収益の流れ",
+        "description": "何にいくら払ってもらうか",
+        "needs": [
+          "課金モデル・価格"
+        ]
+      },
+      {
+        "key": "key-resources",
+        "title": "主要リソース",
+        "description": "価値提供に必要な資源",
+        "needs": [
+          "人・技術・資金・知財"
+        ]
+      },
+      {
+        "key": "key-activities",
+        "title": "主要活動",
+        "description": "価値提供に必要な活動",
+        "needs": [
+          "核となる活動"
+        ]
+      },
+      {
+        "key": "key-partners",
+        "title": "主要パートナー",
+        "description": "外部に頼る相手",
+        "needs": [
+          "提携・仕入・外注先"
+        ]
+      },
+      {
+        "key": "cost-structure",
+        "title": "コスト構造",
+        "description": "主要コストとその構造",
+        "needs": [
+          "固定費・変動費の内訳"
+        ]
+      }
+    ],
+    "prompt": "9ブロックの整合（顧客⇄価値⇄チャネル⇄収益、活動⇄リソース⇄コスト）を検証し、矛盾や未検証の重要仮説を（推測）付きで明示する。"
+  }
+}

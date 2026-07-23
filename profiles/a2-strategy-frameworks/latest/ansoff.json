@@ -1,0 +1,37 @@
+{
+  "profile": "ansoff@1",
+  "title": "アンゾフの成長マトリクス",
+  "description": "製品×市場の4象限で成長機会を洗い出し優先順位を付ける。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "market-penetration",
+        "title": "市場浸透（既存製品×既存市場）",
+        "description": "今の市場でシェアを伸ばす打ち手",
+        "needs": [
+          "現在の製品・サービス",
+          "現在の市場・顧客"
+        ]
+      },
+      {
+        "key": "market-development",
+        "title": "新市場開拓（既存製品×新市場）",
+        "description": "新しい市場・顧客層への展開"
+      },
+      {
+        "key": "product-development",
+        "title": "新製品開発（新製品×既存市場）",
+        "description": "既存顧客への新しい製品・サービス"
+      },
+      {
+        "key": "diversification",
+        "title": "多角化（新製品×新市場）",
+        "description": "新製品×新市場への進出"
+      }
+    ],
+    "prompt": "現有の製品と市場の事実から出発し、各象限の具体的な機会とリスクを挙げる。最後に market-penetration の items 末尾へ「優先順位:」として4象限の推奨順を根拠付きで入れる。"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "profile": "customer-journey@1",
+  "title": "カスタマージャーニー",
+  "description": "認知→検討→購入→利用→推奨の各段階で行動・感情・障害を可視化する。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "awareness",
+        "title": "認知",
+        "description": "顧客が課題や製品を知る段階",
+        "needs": [
+          "顧客がどこで知るか（接点）",
+          "その時の行動・感情"
+        ]
+      },
+      {
+        "key": "consideration",
+        "title": "比較検討",
+        "description": "代替と比較し評価する段階",
+        "needs": [
+          "比較される競合・代替",
+          "検討時の判断基準・不安"
+        ]
+      },
+      {
+        "key": "purchase",
+        "title": "購入",
+        "description": "購入・契約に至る段階",
+        "needs": [
+          "購入の決め手",
+          "購入時の障害・離脱要因"
+        ]
+      },
+      {
+        "key": "usage",
+        "title": "利用",
+        "description": "使い始めて価値を得る段階",
+        "needs": [
+          "利用開始時のつまずき",
+          "継続利用の理由"
+        ]
+      },
+      {
+        "key": "advocacy",
+        "title": "継続・推奨",
+        "description": "継続し他者に薦める段階",
+        "needs": [
+          "推奨・口コミの契機",
+          "解約・離反の理由"
+        ]
+      }
+    ],
+    "prompt": "各段階で行動・接点・感情・障害を挙げ、summary で最重要の離脱ポイントと改善機会を特定する。"
+  }
+}

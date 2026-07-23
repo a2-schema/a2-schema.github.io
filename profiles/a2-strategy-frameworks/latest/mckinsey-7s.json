@@ -1,0 +1,57 @@
+{
+  "profile": "mckinsey-7s@1",
+  "title": "マッキンゼー 7S",
+  "description": "戦略と組織の7要素の整合・不整合を診断し変革の着手点を導く。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "strategy",
+        "title": "戦略 (Strategy)",
+        "description": "競争優位を築く方向性",
+        "needs": [
+          "現在の戦略・方針"
+        ]
+      },
+      {
+        "key": "structure",
+        "title": "組織構造 (Structure)",
+        "description": "組織の形・レポートライン",
+        "needs": [
+          "組織体制・人数"
+        ]
+      },
+      {
+        "key": "systems",
+        "title": "システム (Systems)",
+        "description": "業務プロセス・制度・仕組み",
+        "needs": [
+          "主要な業務プロセス・評価制度"
+        ]
+      },
+      {
+        "key": "shared-values",
+        "title": "共通の価値観 (Shared Values)",
+        "description": "組織に共有された価値観・文化"
+      },
+      {
+        "key": "style",
+        "title": "スタイル (Style)",
+        "description": "経営・リーダーシップのスタイル"
+      },
+      {
+        "key": "staff",
+        "title": "人材 (Staff)",
+        "description": "人材の構成・採用・育成"
+      },
+      {
+        "key": "skills",
+        "title": "スキル (Skills)",
+        "description": "組織としての得意技・能力"
+      }
+    ],
+    "prompt": "ハードS（戦略・組織構造・システム）とソフトS（価値観・スタイル・人材・スキル）の整合・不整合を特定し、summary で変革の着手点を提案する。"
+  }
+}

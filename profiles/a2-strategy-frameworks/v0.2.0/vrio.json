@@ -1,0 +1,41 @@
+{
+  "profile": "vrio@1",
+  "title": "VRIO 分析",
+  "description": "経営資源を V→R→I→O の順に判定し、持続的競争優位を見極める。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "value",
+        "title": "経済価値 (Value)",
+        "description": "その資源は機会を活かし脅威を無力化するか",
+        "needs": [
+          "自社の主要な経営資源・ケイパビリティの一覧"
+        ]
+      },
+      {
+        "key": "rarity",
+        "title": "希少性 (Rarity)",
+        "description": "その資源を持つ競合は少ないか"
+      },
+      {
+        "key": "imitability",
+        "title": "模倣困難性 (Imitability)",
+        "description": "真似・代替にコストがかかるか"
+      },
+      {
+        "key": "organization",
+        "title": "組織 (Organization)",
+        "description": "資源を活かす組織体制があるか"
+      },
+      {
+        "key": "implication",
+        "title": "競争優位の結論",
+        "description": "一時的/持続的競争優位の判定と打ち手"
+      }
+    ],
+    "prompt": "資源・ケイパビリティごとに V→R→I→O を順に判定（○/×と根拠）し、implication で持続的競争優位・一時的優位・均衡・劣位を結論づける。"
+  }
+}

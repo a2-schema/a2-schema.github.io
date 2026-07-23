@@ -1,0 +1,86 @@
+{
+  "profile": "lean-canvas@1",
+  "title": "リーンキャンバス",
+  "description": "スタートアップ向け: 課題起点で最もリスクの高い仮説を特定する。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "problem",
+        "title": "課題",
+        "description": "解決すべき上位1〜3の課題",
+        "needs": [
+          "顧客の具体的な課題",
+          "既存の代替手段"
+        ]
+      },
+      {
+        "key": "customer-segments",
+        "title": "顧客セグメント",
+        "description": "ターゲット顧客とアーリーアダプター",
+        "needs": [
+          "最初に使う顧客像"
+        ]
+      },
+      {
+        "key": "uvp",
+        "title": "独自の価値提案",
+        "description": "一言で言える差別化された価値",
+        "needs": [
+          "競合と違う一言の価値"
+        ]
+      },
+      {
+        "key": "solution",
+        "title": "解決策",
+        "description": "課題に対応する最小限の解決策",
+        "needs": [
+          "課題ごとの解決策"
+        ]
+      },
+      {
+        "key": "channels",
+        "title": "チャネル",
+        "description": "顧客への到達経路",
+        "needs": [
+          "獲得チャネル"
+        ]
+      },
+      {
+        "key": "revenue",
+        "title": "収益の流れ",
+        "description": "収益モデル",
+        "needs": [
+          "課金方法・価格"
+        ]
+      },
+      {
+        "key": "cost",
+        "title": "コスト構造",
+        "description": "主要コスト",
+        "needs": [
+          "主要な固定費・変動費"
+        ]
+      },
+      {
+        "key": "key-metrics",
+        "title": "主要指標",
+        "description": "事業の健全性を測る数値",
+        "needs": [
+          "追うべき指標"
+        ]
+      },
+      {
+        "key": "unfair-advantage",
+        "title": "圧倒的な優位性",
+        "description": "真似できない優位性",
+        "needs": [
+          "他社が容易に真似できない点"
+        ]
+      }
+    ],
+    "prompt": "課題→解決策の適合（Problem/Solution Fit）を最優先で検証し、summary で「最もリスクの高い仮説」を必ず1つ特定する。"
+  }
+}

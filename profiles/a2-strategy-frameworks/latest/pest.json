@@ -1,0 +1,49 @@
+{
+  "profile": "pest@1",
+  "title": "PEST 分析",
+  "description": "政治/経済/社会/技術のマクロ環境分析。事業への影響方向と時間軸を明示する。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "politics",
+        "title": "政治 (Politics)",
+        "description": "規制・法改正・政策・政権動向の影響",
+        "needs": [
+          "関係する規制・法律",
+          "予定されている法改正・政策"
+        ]
+      },
+      {
+        "key": "economy",
+        "title": "経済 (Economy)",
+        "description": "景気・為替・金利・物価・所得の影響",
+        "needs": [
+          "景気・価格動向の事業への影響",
+          "顧客の支出・予算動向"
+        ]
+      },
+      {
+        "key": "society",
+        "title": "社会 (Society)",
+        "description": "人口動態・価値観・ライフスタイルの変化",
+        "needs": [
+          "ターゲット層の人口動態",
+          "価値観・行動様式の変化"
+        ]
+      },
+      {
+        "key": "technology",
+        "title": "技術 (Technology)",
+        "description": "技術革新・代替技術・インフラの変化",
+        "needs": [
+          "関連する技術トレンド",
+          "代替技術・破壊的技術の兆し"
+        ]
+      }
+    ],
+    "prompt": "各項目に事業への影響方向（追い風/逆風）と時間軸（短期/中期）を明記する。事業と無関係な一般論は書かない。"
+  }
+}

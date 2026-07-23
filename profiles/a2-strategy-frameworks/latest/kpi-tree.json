@@ -1,0 +1,34 @@
+{
+  "profile": "kpi-tree@1",
+  "title": "KPI ツリー",
+  "description": "KGI を四則演算で分解し、動かすべき KPI を特定する。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "kgi",
+        "title": "KGI（最終目標）",
+        "description": "事業の最終目標数値",
+        "needs": [
+          "最終目標の指標と目標値（売上・利益等）"
+        ]
+      },
+      {
+        "key": "drivers",
+        "title": "主要ドライバー",
+        "description": "KGI を構成する第1階層の分解（例: 売上=顧客数×単価）",
+        "needs": [
+          "顧客数・単価・頻度などの現状値"
+        ]
+      },
+      {
+        "key": "kpis",
+        "title": "KPI（管理指標）",
+        "description": "各ドライバーを動かす下位指標と目標値"
+      }
+    ],
+    "prompt": "KGI から四則演算で分解できる形（例: 売上=訪問数×転換率×単価）にする。各 KPI に現状値/目標値/計測方法を付け、不明なものは missing に挙げる。"
+  }
+}

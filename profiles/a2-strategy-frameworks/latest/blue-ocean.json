@@ -1,0 +1,36 @@
+{
+  "profile": "blue-ocean@1",
+  "title": "ブルーオーシャン（ERRC）",
+  "description": "業界標準の競争要因を組み替え、新しい価値曲線を作る。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "eliminate",
+        "title": "取り除く (Eliminate)",
+        "description": "業界の常識のうち廃止するもの",
+        "needs": [
+          "業界で標準とされる競争要因の一覧"
+        ]
+      },
+      {
+        "key": "reduce",
+        "title": "減らす (Reduce)",
+        "description": "業界標準より大胆に減らすもの"
+      },
+      {
+        "key": "raise",
+        "title": "増やす (Raise)",
+        "description": "業界標準より大胆に増やすもの"
+      },
+      {
+        "key": "create",
+        "title": "付け加える (Create)",
+        "description": "業界がまだ提供していない新要素"
+      }
+    ],
+    "prompt": "まず業界標準の競争要因を列挙してから ERRC を埋める。summary で新しい価値曲線の要点（誰にとってどう魅力的か）を結論づける。"
+  }
+}

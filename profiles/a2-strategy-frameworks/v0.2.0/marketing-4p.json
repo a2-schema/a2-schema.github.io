@@ -1,0 +1,51 @@
+{
+  "profile": "marketing-4p@1",
+  "title": "4P（マーケティングミックス）",
+  "description": "Product/Price/Place/Promotion の一貫した具体策を組む。",
+  "genTargets": [
+    "summary.html"
+  ],
+  "framework": {
+    "sections": [
+      {
+        "key": "product",
+        "title": "Product（製品・サービス）",
+        "description": "提供価値・機能・品質・ブランド",
+        "needs": [
+          "提供する製品・サービスの中身",
+          "顧客にとっての核となる価値"
+        ]
+      },
+      {
+        "key": "price",
+        "title": "Price（価格）",
+        "description": "価格設定・課金モデル・割引",
+        "needs": [
+          "想定価格・課金モデル",
+          "競合の価格帯",
+          "顧客の支払意欲"
+        ]
+      },
+      {
+        "key": "place",
+        "title": "Place（流通・チャネル）",
+        "description": "届け方・販売チャネル",
+        "needs": [
+          "販売・提供チャネル",
+          "チャネルごとのコストとリーチ"
+        ]
+      },
+      {
+        "key": "promotion",
+        "title": "Promotion（販促）",
+        "description": "認知獲得・訴求・販促の方法",
+        "needs": [
+          "ターゲットへのリーチ手段",
+          "訴求メッセージ",
+          "販促予算感"
+        ]
+      }
+    ],
+    "prompt": "ターゲット顧客とポジショニングとの一貫性を最優先で検証する。4P 間の矛盾（高級品なのに安売りチャネル等）があれば必ず指摘する。"
+  }
+}
