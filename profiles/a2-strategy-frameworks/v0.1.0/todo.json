@@ -1,0 +1,28 @@
+{
+  "profile": "todo@1",
+  "title": "Todo（進捗管理）",
+  "description": "期限・担当・進捗% を持つタスク型。同一データをコアの別ビュー（リスト/カンバン/簡易ガント）で表示する（ビューはコア1実装・Profile 非依存 = instruction v1.1 Phase 2-7）。ノードの完了/未完は Node.state でなく progress で表す。",
+  "nodeTypes": {
+    "todo": {
+      "title": "タスク",
+      "description": "期限/担当/進捗% 付きのタスク。子タスクはネストで表現。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "assignee": { "type": "string", "description": "担当者" },
+          "due": { "type": "string", "format": "date", "description": "期限 (YYYY-MM-DD)" },
+          "progress": { "type": "integer", "minimum": 0, "maximum": 100, "description": "進捗 %" },
+          "priority": { "type": "string", "enum": ["low", "medium", "high"], "description": "優先度" },
+          "estimateHours": { "type": "number", "minimum": 0, "description": "見積工数（時間）" }
+        }
+      },
+      "x-a2-complete-when": ["assignee", "due"]
+    }
+  },
+  "template": [
+    { "text": "やること",
+      "children": [ { "text": "（タスクを追加）", "type": "todo" } ] }
+  ],
+  "genTargets": ["todo-list.csv", "summary.html"]
+}

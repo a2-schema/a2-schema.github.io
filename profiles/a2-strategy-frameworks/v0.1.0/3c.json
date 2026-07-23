@@ -1,0 +1,58 @@
+{
+  "profile": "3c@1",
+  "title": "3C 分析",
+  "description": "市場・顧客 (Customer) / 競合 (Competitor) / 自社 (Company) の3視点フレームワーク。各視点の子ノードとして洞察を追加し、根拠を fields に持たせる。",
+  "nodeTypes": {
+    "3c.customer": {
+      "title": "市場・顧客 (Customer)",
+      "description": "市場規模・顧客ニーズ・購買行動の洞察。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "insight": { "type": "string", "description": "洞察の要約" },
+          "evidence": { "type": "string", "description": "根拠・出典（ResearchDoc id / URL 可）" },
+          "source": { "type": "string", "description": "情報源（URL / ResearchDoc id）" }
+        }
+      },
+      "x-a2-complete-when": ["evidence"]
+    },
+    "3c.competitor": {
+      "title": "競合 (Competitor)",
+      "description": "競合の強み・弱み・シェア・動向。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "insight": { "type": "string", "description": "洞察の要約" },
+          "evidence": { "type": "string", "description": "根拠・出典（ResearchDoc id / URL 可）" },
+          "source": { "type": "string", "description": "情報源（URL / ResearchDoc id）" }
+        }
+      },
+      "x-a2-complete-when": ["evidence"]
+    },
+    "3c.company": {
+      "title": "自社 (Company)",
+      "description": "自社の資源・能力・強み弱み。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "insight": { "type": "string", "description": "洞察の要約" },
+          "evidence": { "type": "string", "description": "根拠・出典（ResearchDoc id / URL 可）" },
+          "source": { "type": "string", "description": "情報源（URL / ResearchDoc id）" }
+        }
+      },
+      "x-a2-complete-when": ["evidence"]
+    }
+  },
+  "template": [
+    { "text": "市場・顧客 (Customer)", "type": "3c.customer",
+      "children": [ { "text": "（洞察を追加）", "type": "3c.customer" } ] },
+    { "text": "競合 (Competitor)", "type": "3c.competitor",
+      "children": [ { "text": "（洞察を追加）", "type": "3c.competitor" } ] },
+    { "text": "自社 (Company)", "type": "3c.company",
+      "children": [ { "text": "（洞察を追加）", "type": "3c.company" } ] }
+  ],
+  "genTargets": ["summary.html", "biz-plan.docx"]
+}

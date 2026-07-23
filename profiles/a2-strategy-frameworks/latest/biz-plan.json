@@ -1,0 +1,154 @@
+{
+  "profile": "biz-plan@1",
+  "title": "事業企画書",
+  "description": "事業企画書の標準構成。各セクションを型付きノードで埋め、a2-gen で企画書 docx に生成する。SWOT / 3C の Map を childMapRef で参照し根拠として繋げられる。",
+  "nodeTypes": {
+    "biz.summary": {
+      "title": "エグゼクティブサマリ",
+      "description": "事業の一言要約と狙い。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "oneLiner": { "type": "string", "description": "一行での事業定義" }
+        }
+      },
+      "x-a2-complete-when": ["oneLiner"]
+    },
+    "biz.problem": {
+      "title": "課題",
+      "description": "解決する課題。誰の・どんな痛みか。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "who": { "type": "string", "description": "課題を持つ主体（セグメント）" },
+          "evidence": { "type": "string", "description": "課題の実在根拠（ResearchDoc id / URL 可）" }
+        }
+      },
+      "x-a2-complete-when": ["who", "evidence"]
+    },
+    "biz.solution": {
+      "title": "解決策",
+      "description": "提供する解決策と差別化点。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "differentiator": { "type": "string", "description": "既存手段との違い（moat）" }
+        }
+      },
+      "x-a2-complete-when": ["differentiator"]
+    },
+    "biz.targetMarket": {
+      "title": "対象市場",
+      "description": "対象セグメントと市場規模。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "segment": { "type": "string", "description": "対象セグメント" },
+          "marketSize": { "type": "string", "description": "市場規模（TAM/SAM/SOM・出典付き）" },
+          "growthRate": { "type": "string", "description": "成長率・トレンド" }
+        }
+      },
+      "x-a2-complete-when": ["segment", "marketSize"]
+    },
+    "biz.businessModel": {
+      "title": "収益モデル",
+      "description": "誰から・何に・いくら課金するか。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "revenueModel": { "type": "string", "description": "課金形態（月額/従量/席単位 等）" },
+          "pricing": { "type": "string", "description": "価格と根拠" }
+        }
+      },
+      "x-a2-complete-when": ["revenueModel"]
+    },
+    "biz.competition": {
+      "title": "競合",
+      "description": "競合と自社優位。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "competitor": { "type": "string", "description": "競合名" },
+          "advantage": { "type": "string", "description": "当該競合に対する優位性" }
+        }
+      },
+      "x-a2-complete-when": ["competitor", "advantage"]
+    },
+    "biz.gtm": {
+      "title": "市場投入 (Go-to-Market)",
+      "description": "最初の顧客への到達経路。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "channel": { "type": "string", "description": "獲得チャネル" },
+          "firstTarget": { "type": "string", "description": "最初に取る顧客像" }
+        }
+      },
+      "x-a2-complete-when": ["channel"]
+    },
+    "biz.financials": {
+      "title": "収支計画",
+      "description": "前提と収支見通し。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "assumptions": { "type": "string", "description": "計画の前提（単価×件数 等）" },
+          "projection": { "type": "string", "description": "収支見通し（期間別）" }
+        }
+      },
+      "x-a2-complete-when": ["assumptions"]
+    },
+    "biz.risk": {
+      "title": "リスク",
+      "description": "主要リスクと対策。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "likelihood": { "type": "integer", "minimum": 1, "maximum": 5, "description": "発生可能性 1〜5" },
+          "impact": { "type": "integer", "minimum": 1, "maximum": 5, "description": "影響度 1〜5" },
+          "mitigation": { "type": "string", "description": "対策" }
+        }
+      },
+      "x-a2-complete-when": ["mitigation"]
+    },
+    "biz.milestone": {
+      "title": "マイルストーン",
+      "description": "期限付きの到達点。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "due": { "type": "string", "format": "date", "description": "期限 (YYYY-MM-DD)" },
+          "owner": { "type": "string", "description": "責任者" }
+        }
+      },
+      "x-a2-complete-when": ["due", "owner"]
+    }
+  },
+  "template": [
+    { "text": "エグゼクティブサマリ", "type": "biz.summary" },
+    { "text": "課題", "type": "biz.problem",
+      "children": [ { "text": "（課題を追加）", "type": "biz.problem" } ] },
+    { "text": "解決策", "type": "biz.solution" },
+    { "text": "対象市場", "type": "biz.targetMarket" },
+    { "text": "収益モデル", "type": "biz.businessModel" },
+    { "text": "競合", "type": "biz.competition",
+      "children": [ { "text": "（競合を追加）", "type": "biz.competition" } ] },
+    { "text": "市場投入 (GTM)", "type": "biz.gtm" },
+    { "text": "収支計画", "type": "biz.financials" },
+    { "text": "リスク", "type": "biz.risk",
+      "children": [ { "text": "（リスクを追加）", "type": "biz.risk" } ] },
+    { "text": "マイルストーン", "type": "biz.milestone",
+      "children": [ { "text": "（マイルストーンを追加）", "type": "biz.milestone" } ] }
+  ],
+  "genTargets": ["biz-plan.docx", "summary.html"]
+}

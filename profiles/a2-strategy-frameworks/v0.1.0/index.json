@@ -1,0 +1,15 @@
+{
+  "$id": "https://a2-schema.org/profiles/a2-strategy-frameworks/v0.1.0/index.json",
+  "set": "a2-strategy-frameworks",
+  "version": "0.1.0",
+  "description": "Strategy-framework profiles for a2-mind / a2-plan (binding C6: consumers READ this set; adding a profile requires zero core change). Every profile file validates against profile.schema.json.",
+  "metaSchema": "profile.schema.json",
+  "profiles": {
+    "swot@1": "swot.json",
+    "3c@1": "3c.json",
+    "biz-plan@1": "biz-plan.json",
+    "todo@1": "todo.json",
+    "product-spec@1": "product-spec.json",
+    "eval-criteria@1": "eval-criteria.json"
+  }
+}

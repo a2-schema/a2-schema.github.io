@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2-schema.org/profiles/a2-strategy-frameworks/v0.1.0/profile.schema.json",
+  "title": "a2 Strategy-Framework Profile (meta-schema)",
+  "description": "Validates every profile file in this set. 1 Profile = nodeTypes (JSON Schemas for Node.fields, keyed by type name) + template (node seed tree) + genTargets (a2-gen mapping). Consumers: a2-mind / a2-plan, READ-ONLY (binding C6, a2-mind-instruction-v1.1 §2: adding a profile MUST require zero core change). Hard rule: every fields property stays OPTIONAL — completeness is declared via x-a2-complete-when and surfaced by the UI (抜け漏れ検出), never enforced as a validation failure (a hard required would block template seeding).",
+  "type": "object",
+  "required": ["profile", "title", "nodeTypes", "template", "genTargets"],
+  "additionalProperties": false,
+  "properties": {
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*@[1-9][0-9]*$",
+      "description": "Profile id '<name>@<major>' (e.g. swot@1). Major bumps only on breaking change; additive edits keep the major."
+    },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "nodeTypes": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": { "^[a-z0-9][a-zA-Z0-9.-]*$": { "$ref": "#/$defs/NodeType" } },
+      "additionalProperties": false,
+      "description": "Type name (Node.type value, e.g. 'swot.strength', 'todo', 'biz.targetMarket') -> definition."
+    },
+    "template": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/TemplateNode" },
+      "description": "Node seed tree inserted under the map root when the profile is applied."
+    },
+    "genTargets": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9-]+\\.(docx|html|csv|pdf)$" },
+      "description": "a2-gen deliverable ids this profile can generate (input = profile + node Envelope)."
+    }
+  },
+  "$defs": {
+    "NodeType": {
+      "type": "object",
+      "required": ["title", "fields"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "fields": {
+          "type": "object",
+          "description": "JSON Schema (draft 2020-12) for Node.fields of this type. All properties MUST be optional (see meta-schema description); the server validates PATCHed fields against this schema (422 on type violation)."
+        },
+        "x-a2-complete-when": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Field names that must be non-empty for the node to count as COMPLETE. UI flags missing ones; not a validation failure."
+        }
+      }
+    },
+    "TemplateNode": {
+      "type": "object",
+      "required": ["text"],
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "type": { "type": "string", "description": "Must name a key of nodeTypes when present." },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/TemplateNode" } }
+      }
+    }
+  }
+}

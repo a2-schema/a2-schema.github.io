@@ -1,0 +1,74 @@
+{
+  "profile": "swot@1",
+  "title": "SWOT 分析",
+  "description": "強み/弱み/機会/脅威の4象限フレームワーク。内部要因 (S/W) × 外部要因 (O/T)。各象限の子ノードとして項目を追加し、根拠 (evidence) と影響度 (impact) を fields に持たせる。根拠は ResearchDoc 参照可。",
+  "nodeTypes": {
+    "swot.strength": {
+      "title": "強み (Strength)",
+      "description": "内部・プラス要因。自社が持つ優位性。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "evidence": { "type": "string", "description": "根拠・出典（ResearchDoc id / URL 可）" },
+          "impact": { "type": "integer", "minimum": 1, "maximum": 5, "description": "影響度 1〜5" },
+          "source": { "type": "string", "description": "情報源（URL / ResearchDoc id）" }
+        }
+      },
+      "x-a2-complete-when": ["evidence"]
+    },
+    "swot.weakness": {
+      "title": "弱み (Weakness)",
+      "description": "内部・マイナス要因。自社の劣位・不足。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "evidence": { "type": "string", "description": "根拠・出典（ResearchDoc id / URL 可）" },
+          "impact": { "type": "integer", "minimum": 1, "maximum": 5, "description": "影響度 1〜5" },
+          "source": { "type": "string", "description": "情報源（URL / ResearchDoc id）" }
+        }
+      },
+      "x-a2-complete-when": ["evidence"]
+    },
+    "swot.opportunity": {
+      "title": "機会 (Opportunity)",
+      "description": "外部・プラス要因。市場・環境の追い風。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "evidence": { "type": "string", "description": "根拠・出典（ResearchDoc id / URL 可）" },
+          "impact": { "type": "integer", "minimum": 1, "maximum": 5, "description": "影響度 1〜5" },
+          "source": { "type": "string", "description": "情報源（URL / ResearchDoc id）" }
+        }
+      },
+      "x-a2-complete-when": ["evidence"]
+    },
+    "swot.threat": {
+      "title": "脅威 (Threat)",
+      "description": "外部・マイナス要因。市場・環境の逆風。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "evidence": { "type": "string", "description": "根拠・出典（ResearchDoc id / URL 可）" },
+          "impact": { "type": "integer", "minimum": 1, "maximum": 5, "description": "影響度 1〜5" },
+          "source": { "type": "string", "description": "情報源（URL / ResearchDoc id）" }
+        }
+      },
+      "x-a2-complete-when": ["evidence"]
+    }
+  },
+  "template": [
+    { "text": "強み (S)", "type": "swot.strength",
+      "children": [ { "text": "（強みを追加）", "type": "swot.strength" } ] },
+    { "text": "弱み (W)", "type": "swot.weakness",
+      "children": [ { "text": "（弱みを追加）", "type": "swot.weakness" } ] },
+    { "text": "機会 (O)", "type": "swot.opportunity",
+      "children": [ { "text": "（機会を追加）", "type": "swot.opportunity" } ] },
+    { "text": "脅威 (T)", "type": "swot.threat",
+      "children": [ { "text": "（脅威を追加）", "type": "swot.threat" } ] }
+  ],
+  "genTargets": ["summary.html", "biz-plan.docx"]
+}

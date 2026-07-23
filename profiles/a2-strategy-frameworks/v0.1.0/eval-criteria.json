@@ -1,0 +1,53 @@
+{
+  "profile": "eval-criteria@1",
+  "title": "評価基準（意思決定マトリクス）",
+  "description": "選択肢を重み付き基準で評価して決定する。採点はコアの投票機能 (Node.votes) を使い、決定は decision 昇格 → IXF a2.decided（rejectedAlternatives に不採用案）で台帳に残す。",
+  "nodeTypes": {
+    "eval.criterion": {
+      "title": "評価基準",
+      "description": "重みと尺度を持つ基準。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "重み 0〜1（合計1を推奨・UI で合計を表示）" },
+          "scale": { "type": "string", "description": "採点尺度の説明（例: 1=悪い〜5=優れる）" }
+        }
+      },
+      "x-a2-complete-when": ["weight"]
+    },
+    "eval.option": {
+      "title": "選択肢",
+      "description": "評価対象の案。採点は各基準に対する投票 (votes) で行う。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "summary": { "type": "string", "description": "案の要約" }
+        }
+      },
+      "x-a2-complete-when": ["summary"]
+    },
+    "eval.decisionRule": {
+      "title": "決定ルール",
+      "description": "集計方法。決定時に a2.decided の根拠になる。",
+      "fields": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "method": { "type": "string", "enum": ["weighted-sum", "veto", "consensus"], "description": "集計方法" },
+          "threshold": { "type": "string", "description": "採用条件（例: 最高得点かつ 3.5 以上）" }
+        }
+      },
+      "x-a2-complete-when": ["method"]
+    }
+  },
+  "template": [
+    { "text": "評価基準", "type": "eval.criterion",
+      "children": [ { "text": "（基準を追加）", "type": "eval.criterion" } ] },
+    { "text": "選択肢", "type": "eval.option",
+      "children": [ { "text": "（選択肢を追加）", "type": "eval.option" } ] },
+    { "text": "決定ルール", "type": "eval.decisionRule" }
+  ],
+  "genTargets": ["decision-matrix.csv", "summary.html"]
+}
