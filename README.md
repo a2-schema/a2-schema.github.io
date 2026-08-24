@@ -100,6 +100,7 @@ Each published artifact is **immutable per version** and served at a URL whose p
 | Profile | [Contract](profiles/contract/v0.1.11/schema.json) | v0.1.11 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) — **body-owning** (owns the FULL contract module §1–§14, 85 defs incl. Contract primitives moved out of GV; GV-lean) |
 | Profile | [Compliance](profiles/compliance/v0.0.2/schema.json) | v0.0.2 | Compliance (GDPR, EU AI Act, SOC 2, ISO 27001, …) — **body-owning** (owns §10 entity defs; GV-lean) |
 | Profile | [Delegation](profiles/delegation/v0.0.2/schema.json) | v0.0.2 | Power-of-attorney / delegation — **body-owning** |
+| Profile | [Law](profiles/law/v0.1.0/schema.json) | v0.1.0 | a2-law generation provenance (LLM/template/playbook/process versions, slot values, per-clause marks with statutory grounds) — **body-owning**, hand-written; references the Contract profile by id (two-layer) |
 
 > **v0.0.13 (GV-lean fix over v0.0.12):** §8 Contract primitives moved OUT of GV into the body-owning
 > Contract profile; composed (GV v0.0.13 + Contract profile) reproduces the v0.0.12 def set

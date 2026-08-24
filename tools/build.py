@@ -591,6 +591,18 @@ def check_profile(p):
 print("signature-profile unresolved:", check_profile(sig_profile) or "NONE ✓")
 print("contract-profile  unresolved:", check_profile(ct_profile) or "NONE ✓")
 print("compliance-profile unresolved:", check_profile(comp_profile) or "NONE ✓")
+# law profile is HAND-WRITTEN (like delegation) — build.py never writes it, but it
+# gets the same resolution check (read from disk; skip silently if absent).
+_law_path = os.path.join(OUT, "profiles/law/latest/schema.json")
+if os.path.exists(_law_path):
+    law_profile = json.load(open(_law_path, encoding="utf-8"))
+    print("law-profile       unresolved:", check_profile(law_profile) or "NONE ✓")
+    try:
+        from jsonschema import Draft202012Validator as _V
+        _V.check_schema(law_profile)
+        print("law-profile metaschema: VALID ✓")
+    except ImportError:
+        pass
 
 # ---- 6. tiers / tier-config meta: NOT published (decision 2026-06-17) -----------
 # Tier configs are INTERNAL build manifests: they select GV defs per app/doctype AND

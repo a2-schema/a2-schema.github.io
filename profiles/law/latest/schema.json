@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2-schema.org/profiles/law/v0.1.0/schema.json",
+  "title": "Law Profile v0.1.0",
+  "version": "0.1.0",
+  "description": "Generation-provenance profile for a2-law documents (生成の来歴＝工程の属性): which template/playbook/process version produced the document, with which LLM (GV AIAction), which slot values filled it, and per-clause marks (generated / user_modified / user_added) with statutory grounds. The contract CONTENT stays in the Contract profile — a LawGenerationRecord references the contract-profile document by id (two-layer). Records are stored as a2-vault type-1 records VERBATIM, so all provenance is written at generation time. Shared types $ref Grand Vault v0.0.10.",
+  "license": "Apache-2.0",
+  "x-a2-role": "profile",
+  "x-a2-base-schema": "https://a2-schema.org/vault/v0.0.10/schema.json",
+  "x-a2-depends-on": ["contract-profile-v0.1.11"],
+  "$defs": {
+    "_____LP1_ENUMS_____": {
+      "description": "─── §1 Enumerations ───"
+    },
+    "ClauseMarkEnum": {
+      "type": "string",
+      "enum": ["generated", "user_modified", "user_added"],
+      "description": "Per-clause provenance mark. generated = text as generated (template + LLM, unchanged since). user_modified = the user edited the generated text (set on re-import when the current text differs from generatedTextSha256; such clauses are EXCLUDED from automatic update candidates — proposal only). user_added = the clause did not come from generation."
+    },
+    "_____LP2_CLAUSE_PROVENANCE_____": {
+      "description": "─── §2 Per-clause provenance ───"
+    },
+    "LawClauseProvenance": {
+      "type": "object",
+      "description": "Provenance of ONE clause of the generated document. clauseKey is the stable join key between this record, the docx bookmark anchor (a2c_<clauseKey>), and amendment-impact notices.",
+      "properties": {
+        "$tag": { "const": "LawClauseProvenance" },
+        "clauseKey": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable key of the clause WITHIN this document (also the docx bookmark anchor name a2c_<clauseKey>). Not the display clause number — numbering shifts when optional clauses are dropped or clauses are inserted."
+        },
+        "mark": { "$ref": "#/$defs/ClauseMarkEnum" },
+        "clauseTypeId": {
+          "type": "string",
+          "description": "a2-law clause_types catalog id the clause was generated from (e.g. limitation_of_liability_and_force_majeure). Absent for user_added clauses."
+        },
+        "originArticle": {
+          "type": "string",
+          "description": "由来条番号 — the clause number in the source template at generation time (e.g. 第20条). Display-only; the machine-stable key is clauseKey."
+        },
+        "generatedTextSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "sha256 (hex) of the clause text AS GENERATED. Re-import diffs the current clause text against this to set mark=user_modified. Absent for user_added clauses."
+        },
+        "legalGrounds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "根拠法令条, transcribed from the playbook checkpoint grounds, in EXACTLY the label format a2-law amendment-impact matching uses: '<法令タイトル> 第N条' optionally extended with '/第M項' (e.g. '個人情報の保護に関する法律 第27条'). Keeping this format means the existing impact matcher works on law-profile documents unchanged."
+        }
+      },
+      "required": ["$tag", "clauseKey", "mark"]
+    },
+    "_____LP3_ROOT_____": {
+      "description": "─── §3 Root record ───"
+    },
+    "LawGenerationRecord": {
+      "type": "object",
+      "description": "The generation-provenance record of ONE generated document (one a2-vault type-1 record). Written in full at generation time (a2-vault stores records verbatim and never adds fields). Identity vs integrity are SEPARATE on purpose: documentId (uuidv7) tracks the same document across byte changes; content sha256 (kept by the version ledger / a2-sign sourceFile) detects tampering. Do not mix the two roles.",
+      "properties": {
+        "$tag": { "const": "LawGenerationRecord" },
+        "profileVersion": {
+          "type": "string",
+          "description": "Version of this profile the record was written against (e.g. '0.1.0')."
+        },
+        "documentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "同一性追跡用 id (uuidv7), minted at generation. Embedded in the docx custom XML part (/a2/law-profile.xml) and in the PDF/A-3 attached JSON, so an externally edited file can be re-imported to the right record."
+        },
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "a2-vault record id of THIS record. Required also in 個人保管 (personally kept) JSON: personal keeping means NO amendment notifications; bringing the PDF back (re-import by recordId) rejoins notifications."
+        },
+        "contractDocumentRef": {
+          "type": "string",
+          "description": "id reference to the contract-profile document holding the CONTENT (two-layer: law profile = provenance, contract profile = content)."
+        },
+        "matterId": {
+          "type": "string",
+          "description": "a2-law version-ledger (matter_event) matter id, when the document is tracked there."
+        },
+        "versionId": {
+          "type": "string",
+          "description": "matter_event version id of the generated output this record describes."
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Generation timestamp."
+        },
+        "aiAction": {
+          "$ref": "https://a2-schema.org/vault/v0.0.10/schema.json#/$defs/AIAction",
+          "description": "LLM provenance — GV shared type reused as-is (modelName, modelVersion, provider, deploymentId, dataLineage, humanOversight …). Enables mechanical extraction of documents generated by an old model version."
+        },
+        "processVersionId": {
+          "type": "string",
+          "description": "a2-law process_version id (工程版) the generation ran under."
+        },
+        "templateSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "テンプレ版指紋 — sha256 (hex) of the a2-law template file (templates/<類型>.json) at generation time."
+        },
+        "playbookSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "観点版指紋 — sha256 (hex) of the a2-law playbook file (playbook/<類型>.json) at generation time."
+        },
+        "slots": {
+          "type": "object",
+          "description": "スロット値一式 (slot id → confirmed value) as filled at compose time. This is the horizontal-reuse material: swap these values and regenerate for another counterparty / another product; only user_modified clauses need a carry-over confirmation."
+        },
+        "clauses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/LawClauseProvenance" },
+          "description": "Per-clause provenance marks, one entry per clause of the document."
+        }
+      },
+      "required": ["$tag", "documentId", "recordId", "generatedAt"]
+    }
+  },
+  "x-a2-included-defs": ["AIAction"]
+}
