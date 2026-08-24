@@ -22,7 +22,7 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 GV12 = os.path.join(ROOT, "vault/v0.0.12/schema.json")
 GV13 = os.path.join(ROOT, "vault/v0.0.13/schema.json")
-CT = os.path.join(ROOT, "profiles/contract/v0.1.10/schema.json")
+CT = os.path.join(ROOT, "profiles/contract/latest/schema.json")
 
 _ANY_DEFS_REF = re.compile(r'"\$ref":\s*"[^"]*#/\$defs/([A-Za-z0-9_]+)"')
 _SIG_TYPES = ("BlockSignature", "HandwrittenSignature", "BiometricCapture", "SignatureBundle")

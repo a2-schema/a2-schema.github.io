@@ -16,9 +16,10 @@ Instruction / AuditSession are introduced (no existing property is retyped/remov
 """
 import json, re, copy, hashlib, os, glob
 
-# Source schemas live in the dx-platform working repo (GV is built FROM the in-repo
-# SSoT). Override with A2_DX_ROOT if cloned elsewhere.
-DX = os.environ.get("A2_DX_ROOT", os.path.expanduser("~/Documents/Business/dx-platform"))
+# Frozen source schemas live IN THIS REPO under tools/inputs/ (moved out of
+# dx-platform 2026-08-24 — owner ruling: the dx-platform copies were deleted;
+# this repo is the sole home of the build inputs).
+INPUTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "inputs")
 # Output root = repo root = the GitHub Pages site root for the a2-schema.org apex
 # domain. File paths therefore mirror the $id URL paths (no /schemas/ prefix), so
 # every $id / $ref resolves directly once the domain is live.
@@ -28,13 +29,13 @@ GV_ID = DOMAIN + "vault/v0.0.13/schema.json"          # vault OUTPUT (v0.0.13 �
 GV_REF_ID = DOMAIN + "vault/v0.0.10/schema.json"      # profiles STAY pinned to the frozen v0.0.10 for SHARED types (they don't
                                                       # use OperationLog / the doc-level $signatures → zero needless churn; v0.0.10 ⊂ v0.0.13)
 SIG_ID = DOMAIN + "profiles/signature/v0.0.3/schema.json"
-CT_ID = DOMAIN + "profiles/contract/v0.1.10/schema.json"
+CT_ID = DOMAIN + "profiles/contract/v0.1.11/schema.json"
 COMP_ID = DOMAIN + "profiles/compliance/v0.0.2/schema.json"
 TIER_META_ID = DOMAIN + "tier-configs/_meta/v0.1.0/schema.json"   # meta-schema describing tier configs (under tier-configs/)
 GVREF = GV_REF_ID + "#/$defs/"                        # profiles $ref the pinned GV (v0.0.10), NOT the new output
 
-gv = json.load(open(f"{DX}/xml/ichiriXML/a2_grand_vault_v_00_00_07.schema.json"))
-ct = json.load(open(f"{DX}/xml/ichiriXML/a2-schema_module_schema/contract/a2_contract_module_v_00_01_06.schema.json"))
+gv = json.load(open(f"{INPUTS}/a2_grand_vault_v_00_00_07.schema.json"))
+ct = json.load(open(f"{INPUTS}/a2_contract_module_v_00_01_06.schema.json"))
 gd, cd = gv["$defs"], ct["$defs"]
 
 # ---- 1. contract signing-primitive closure -------------------------------------
@@ -511,11 +512,29 @@ def _ct_place(body):
         x = m.group(1)
         return '"$ref": "#/$defs/%s"' % x if x in _CT_OWNED else '"$ref": "%s%s"' % (GVREF, x)
     return json.loads(re.sub(r'"\$ref":\s*"#/\$defs/([A-Za-z0-9_]+)"', repl, json.dumps(body)))
-# LOSSLESS: take the contract def BODIES from the FROZEN v0.0.12 (byte-identical), with
-# refs to SHARED types rewritten to GV refs (contract-internal refs stay local). After the
-# composer localizes them back, they reproduce v0.0.12 exactly. Carry the §8 marker too.
-_ct_owned = {n: _ct_place(_V12[n]) for n in _CT_OWNED_RAW if n in _V12}
-if _S8_MARKER in _V12:
+# FULL contract module → profile (v0.1.11): restore ALL of a2_contract_module_v_00_01_06
+# (85 defs, incl. the 49 substantive defs Opus dropped + the §-sections), so the contract
+# vocabulary is complete. Rewrite refs: RENAME (Party→ContractParty …), stale absolute
+# vault/v0.0.6 refs → the current GV pin, contract-internal refs → local.
+#   - The 22 defs that ALSO exist in GV0.0.12 are taken from v0.0.12 (byte-identical) so the
+#     lossless gate stays green; the other 63 come from the module (rewritten) as ADDITIONS.
+def _ct_module_rewrite(body):
+    s = json.dumps(body, ensure_ascii=False)
+    s = re.sub(r'https://a2-schema\.org/vault/v[0-9.]+/schema\.json#/\$defs/', GVREF, s)  # GV refs → current pin
+    def loc(m):
+        x = m.group(1); nx = RENAME.get(x, x)
+        return '"$ref": "#/$defs/%s"' % nx if x in cd else '"$ref": "%s%s"' % (GVREF, nx)
+    return json.loads(re.sub(r'"\$ref":\s*"#/\$defs/([A-Za-z0-9_]+)"', loc, s))
+_ct_owned = {}
+for _name, _body in cd.items():
+    _nm = RENAME.get(_name, _name)
+    _ct_owned[_nm] = _ct_place(_V12[_nm]) if _nm in _V12 else _ct_module_rewrite(_body)
+# Ensure EVERY GV0.0.12 contract def is in the profile (lossless) — incl. build-synthetic
+# defs not in the module (ContractSigningCeremony / HandwrittenContractSignature).
+for _n in _CT_OWNED_RAW:
+    if _n not in _ct_owned and _n in _V12:
+        _ct_owned[_n] = _ct_place(_V12[_n])
+if _S8_MARKER in _V12:                       # GV0.0.12's §8 marker — keep for lossless reproduction
     _ct_owned[_S8_MARKER] = _V12[_S8_MARKER]
 _ct_defs = {
     **_ct_owned,
@@ -537,8 +556,8 @@ _ct_defs = {
 _ct_gv_refs = sorted(set(re.findall(re.escape(GVREF) + r'([A-Za-z0-9_]+)', json.dumps(_ct_defs))))
 ct_profile = {
     "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": CT_ID,
-    "title": "Contract Profile v0.1.10", "version": "0.1.10",
-    "description": "Body-owning Contract DOMAIN profile (GV-lean, 2026-06-25): OWNS the contract primitives (ContractParty/ContractClause/PartyAddress/PartyContact/PartyIdentifier/PartyRoleEnum/PartyTypeEnum/PartySignatureStateEnum/SignatoryBlock/ClauseTypeEnum/ConsentToESign/USESIGNCompliance/RedlineAction/RedlineActionEnum/SigningCeremonyEvidence/ContractSigningCeremony/HandwrittenContractSignature) — moved OUT of GV in v0.0.13 — plus ContractRoot + ContractConsentReceipt. $refs Grand Vault v0.0.10 for SHARED types and the Signature profile for SignatureNode. Composed (GV v0.0.13 + this profile) reproduces the old GV v0.0.12 def set (lossless).",
+    "title": "Contract Profile v0.1.11", "version": "0.1.11",
+    "description": "Body-owning Contract DOMAIN profile (GV-lean). v0.1.11 RESTORES the FULL contract module a2_contract_module_v_00_01_06 (85 $defs across §1–§14: enums, parties, clauses/provisions, key terms, obligations, lifecycle, signatures, relationships, risk/compliance, JP-specific 電子署名法/印紙税法/下請法, US-specific HIPAA/state, financial, operational, and the ContractDocument root) — the 49 substantive defs that an earlier build had DROPPED are back. Refs: RENAME (Party→ContractParty …), shared types $ref Grand Vault v0.0.10, SignatureNode via the Signature profile. The 22 defs that also exist in GV0.0.12 are byte-identical to v0.0.12, so Composed (GV v0.0.13 + this profile) still reproduces the old GV v0.0.12 def set (lossless gate: tools/composed_lossless_test.py); the other 63 are additions.",
     "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_REF_ID,
     "x-a2-depends-on": ["signature-profile-v0.0.3"],
     "$defs": _ct_defs,

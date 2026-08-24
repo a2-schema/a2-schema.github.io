@@ -95,12 +95,16 @@ Each published artifact is **immutable per version** and served at a URL whose p
 
 | Type | Schema | Version | Role |
 |---|---|---|---|
-| **SSoT** | [Grand Vault](vault/v0.0.12/schema.json) | v0.0.12 | **Lean** SSoT of shared/universal types (Common, HashChain, AI Audit, OperationLog, **Signature (multi-party `$signatures`)**, Biometric, SigningCeremony, Contract primitives, ConsentReceipt, ComplianceFrameworkEnum). Domain defs live in profiles. |
+| **SSoT** | [Grand Vault](vault/v0.0.13/schema.json) | v0.0.13 | **Lean** SSoT of shared/universal types (Common, HashChain, AI Audit, OperationLog, **Signature (multi-party `$signatures`)**, Biometric, SigningCeremony, ConsentReceipt, ComplianceFrameworkEnum). Domain defs live in profiles. |
 | Profile | [Signature](profiles/signature/v0.0.3/schema.json) | v0.0.3 | Signature use cases (ML-DSA, RSA, JAdES, Handwritten ISO 19794-7) — pure aggregator |
-| Profile | [Contract](profiles/contract/v0.1.9/schema.json) | v0.1.9 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) — pure aggregator |
+| Profile | [Contract](profiles/contract/v0.1.11/schema.json) | v0.1.11 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) — **body-owning** (owns the FULL contract module §1–§14, 85 defs incl. Contract primitives moved out of GV; GV-lean) |
 | Profile | [Compliance](profiles/compliance/v0.0.2/schema.json) | v0.0.2 | Compliance (GDPR, EU AI Act, SOC 2, ISO 27001, …) — **body-owning** (owns §10 entity defs; GV-lean) |
 | Profile | [Delegation](profiles/delegation/v0.0.2/schema.json) | v0.0.2 | Power-of-attorney / delegation — **body-owning** |
 
+> **v0.0.13 (GV-lean fix over v0.0.12):** §8 Contract primitives moved OUT of GV into the body-owning
+> Contract profile; composed (GV v0.0.13 + Contract profile) reproduces the v0.0.12 def set
+> byte-for-byte (gate: `tools/composed_lossless_test.py`). **Contract v0.1.11** restores the FULL
+> contract module (85 defs; build inputs frozen in-repo under `tools/inputs/`).
 > **v0.0.12 (patch over v0.0.11):** the **A2Envelope** DOCUMENT signature slot is now **`$signatures`**
 > (array of `BlockSignature`) for **multi-party signing** (甲乙…) — every party signs the same canonical
 > body (the array is excluded from the payload), single-signer = length 1; `BlockSignature` gains an
@@ -110,7 +114,7 @@ Each published artifact is **immutable per version** and served at a URL whose p
 > (actor + IAL/AAL/FAL + result, signable/hash-chained; `operation` is a free string).
 > **v0.0.10 = GV-lean:** compliance §10 entity defs moved OUT of GV into the body-owning compliance
 > profile; only shared `ConsentReceipt` + `ComplianceFrameworkEnum` remain in GV (GV 135→128 defs).
-> Prior versions (GV [v0.0.8](vault/v0.0.8/schema.json)/[v0.0.9](vault/v0.0.9/schema.json)/[v0.0.10](vault/v0.0.10/schema.json)/[v0.0.11](vault/v0.0.11/schema.json), signature v0.0.1–2, contract v0.1.7–8, compliance v0.0.1, delegation v0.0.1) remain for `$ref` stability.
+> Prior versions (GV [v0.0.8](vault/v0.0.8/schema.json)/[v0.0.9](vault/v0.0.9/schema.json)/[v0.0.10](vault/v0.0.10/schema.json)/[v0.0.11](vault/v0.0.11/schema.json)/[v0.0.12](vault/v0.0.12/schema.json), signature v0.0.1–2, contract v0.1.7–10, compliance v0.0.1, delegation v0.0.1) remain for `$ref` stability.
 
 ## Tier configs — not published
 
