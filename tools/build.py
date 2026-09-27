@@ -25,10 +25,12 @@ INPUTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "inputs")
 # every $id / $ref resolves directly once the domain is live.
 OUT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 DOMAIN = "https://a2-schema.org/"
-GV_ID = DOMAIN + "vault/v0.0.13/schema.json"          # vault OUTPUT (v0.0.13 — GV-lean FIX: §8 Contract primitives REMOVED from GV → moved to the Contract profile; lean common core only)
+GV_ID = DOMAIN + "vault/v0.0.14/schema.json"          # vault OUTPUT (v0.0.14 — PURELY ADDITIVE over the frozen v0.0.13: §4b JWE encryption primitives, RFC 7516)
 GV_REF_ID = DOMAIN + "vault/v0.0.10/schema.json"      # profiles STAY pinned to the frozen v0.0.10 for SHARED types (they don't
                                                       # use OperationLog / the doc-level $signatures → zero needless churn; v0.0.10 ⊂ v0.0.13)
-SIG_ID = DOMAIN + "profiles/signature/v0.0.3/schema.json"
+SIG_ID = DOMAIN + "profiles/signature/v0.0.3/schema.json"   # FROZEN (the Contract profile v0.1.11 depends on it) — not rewritten
+SIG4_ID = DOMAIN + "profiles/signature/v0.0.4/schema.json"  # NEW: v0.0.3 + the §4b JWE encryption defs; pinned to GV v0.0.14
+GV14REF = GV_ID + "#/$defs/"                          # the Signature profile v0.0.4 $refs GV v0.0.14 (JWE defs are not in v0.0.10)
 CT_ID = DOMAIN + "profiles/contract/v0.1.11/schema.json"
 COMP_ID = DOMAIN + "profiles/compliance/v0.0.2/schema.json"
 TIER_META_ID = DOMAIN + "tier-configs/_meta/v0.1.0/schema.json"   # meta-schema describing tier configs (under tier-configs/)
@@ -453,13 +455,64 @@ _S8_MARKER = "_____S8_CONTRACT_PRIMITIVES_____"
 # GV0.0.13 $defs = v0.0.12 SHARED defs only (byte-identical; contract + §8 marker removed)
 nd = {k: v for k, v in _V12.items() if k not in _CONTRACT_NAMES and k != _S8_MARKER}
 
-# ---- 3. GV v0.0.9 document ------------------------------------------------------
+# ---- 2e. v0.0.14 = the FROZEN v0.0.13 + §4b JWE encryption primitives (PURELY ADDITIVE) --
+# Every v0.0.13 def stays byte-identical (read from the frozen file); only NEW defs are added.
+# ⚖ owner 2026-09-27「Aでやれ」: a document stored encrypted (a2-vault paid storage, a2-sign …)
+# uses ONE shared JOSE type — the sibling of BlockSignature (JWS). A signed a2 JSON (JWS/JAdES)
+# is encrypted whole as a JWE, so its signatures stay verifiable after decryption.
+_V13 = json.load(open(os.path.join(OUT, "vault/v0.0.13/schema.json"), encoding="utf-8"))["$defs"]
+assert nd == _V13, "v0.0.13 derivation drifted — the frozen v0.0.13 file must equal the derived defs"
+nd = dict(_V13)
+_B64U = "^[A-Za-z0-9\\-_]*$"
+JWE_DEFS = {
+    "_____S4B_ENCRYPTION_PRIMITIVES_____": {"description": "─── §4b Encryption Primitives (JWE — RFC 7516 / RFC 7518) ───", "x-a2-section": True},
+    "JWEKeyManagementAlgEnum": {
+        "type": "string",
+        "enum": ["RSA-OAEP-256", "ECDH-ES+A256KW", "A256KW", "dir"],
+        "description": "JWE key management algorithm ('alg', RFC 7518 §4). RSA-OAEP-256: the content encryption key is wrapped with the public key of an RSA-OAEP (SHA-256) asymmetric-decrypt key and unwrapped by that key's holder (e.g. Cloud KMS or AWS KMS) — the private key never leaves the KMS. 'dir': no encrypted_key (a shared symmetric key is used directly as the content encryption key).",
+        "x-ietf": "RFC 7518 §4"},
+    "JWEContentEncryptionAlgEnum": {
+        "type": "string",
+        "enum": ["A256GCM"],
+        "description": "JWE content encryption algorithm ('enc', RFC 7518 §5.3). A256GCM = AES-256-GCM, the a2-schema standard. A new random content encryption key is generated for every encryption.",
+        "x-ietf": "RFC 7518 §5.3"},
+    "JWEProtectedHeaderDecoded": {
+        "type": "object",
+        "description": "JWE Protected Header — decoded form for schema validation and AI readability (the 'protected' member of JWEFlattenedJSON is base64url(UTF-8(JSON))). Not encrypted, but integrity-protected (it is the AAD of the content encryption): tools can read which algorithm and which key-encryption key apply without decrypting the content.",
+        "properties": {
+            "alg": {"$ref": "#/$defs/JWEKeyManagementAlgEnum", "description": "REQUIRED. Key management algorithm."},
+            "enc": {"$ref": "#/$defs/JWEContentEncryptionAlgEnum", "description": "REQUIRED. Content encryption algorithm."},
+            "kid": {"type": "string", "description": "Identifier of the key-encryption key that wrapped the content encryption key (e.g. a Cloud KMS key version resource name or an AWS KMS key ARN). Moving the key-encryption key to another KMS changes only this value; the ciphertext format is unchanged."},
+            "typ": {"type": "string", "description": "Media type of the complete JWE.", "examples": ["JOSE+JSON"]},
+            "cty": {"type": "string", "description": "Content type of the plaintext. 'application/a2-schema' when the plaintext is an a2-schema document (e.g. a signed A2Envelope).", "default": "application/a2-schema"}},
+        "required": ["alg", "enc"],
+        "x-ietf": "RFC 7516 §4"},
+    "JWEFlattenedJSON": {
+        "type": "object",
+        "description": "Flattened JWE JSON Serialization (RFC 7516 §7.2.2). Encrypts one whole a2-schema JSON document — typically a signed A2Envelope, so the JWS/JAdES signatures inside remain verifiable after decryption. Envelope encryption: one random content encryption key per encryption, wrapped by the key-encryption key named in the protected header 'kid' and carried in 'encrypted_key'. Additional members, if present and not understood, MUST be ignored (RFC 7516 §7.2.1).",
+        "properties": {
+            "protected": {"type": "string", "pattern": _B64U, "description": "REQUIRED. Base64url-encoded JWE Protected Header (RFC 7516 §4). Decoded form: JWEProtectedHeaderDecoded."},
+            "_protectedDecoded": {"$ref": "#/$defs/JWEProtectedHeaderDecoded", "description": "NON-NORMATIVE. Human-readable decoded form of 'protected'. Provided for AI readability and debugging; NOT used in decryption — derived from 'protected'."},
+            "header": {"type": "object", "description": "Per-recipient JWE Unprotected Header (RFC 7516 §7.2.1). Not integrity-protected."},
+            "encrypted_key": {"type": "string", "pattern": _B64U, "description": "Base64url-encoded JWE Encrypted Key = the content encryption key wrapped by the key-encryption key. REQUIRED unless alg is 'dir' (then absent)."},
+            "iv": {"type": "string", "pattern": _B64U, "description": "REQUIRED. Base64url-encoded JWE Initialization Vector (96 bits for A256GCM)."},
+            "ciphertext": {"type": "string", "pattern": _B64U, "description": "REQUIRED. Base64url-encoded JWE Ciphertext."},
+            "tag": {"type": "string", "pattern": _B64U, "description": "REQUIRED. Base64url-encoded JWE Authentication Tag."},
+            "aad": {"type": "string", "pattern": _B64U, "description": "Base64url-encoded JWE AAD (additional authenticated data), when used."}},
+        "required": ["protected", "iv", "ciphertext", "tag"],
+        "x-ietf": "RFC 7516 §7.2.2"},
+}
+for _k in JWE_DEFS:
+    assert _k not in nd, f"{_k} already exists in v0.0.13 — v0.0.14 must be purely additive"
+nd.update(JWE_DEFS)
+
+# ---- 3. GV v0.0.14 document -----------------------------------------------------
 gv8 = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": GV_ID,
-    "title": "Grand Vault v0.0.13 — lean SSoT (shared types only)",
-    "version": "0.0.13",
-    "description": "Lean SSoT of SHARED/universal types. v0.0.13 (patch over v0.0.12) — GV-lean FIX: the §8 Contract PRIMITIVES (ContractParty/ContractClause/PartyAddress/PartyContact/PartyIdentifier/PartyRoleEnum/PartyTypeEnum/PartySignatureStateEnum/SignatoryBlock/ClauseTypeEnum/ConsentToESign/USESIGNCompliance/RedlineAction/RedlineActionEnum/SigningCeremonyEvidence/ContractSigningCeremony/HandwrittenContractSignature) were WRONGLY folded into GV; they are a contract DOMAIN concern and are now body-owned by the Contract PROFILE (mirrors the §10 compliance fix). GV keeps only shared types (A2Envelope, BlockSignature, SignatureBundle, HashChain, SigningCeremony, HandwrittenSignature, OperationLog, ConsentReceipt, ComplianceFrameworkEnum, the §3 AI-audit AIAction/Instruction/AuditSession, …). Composed (this GV + Contract profile) reproduces the full v0.0.12 def set (lossless). v0.0.12 carried A2Envelope.$signatures[] multi-party + per-signer `signer`; v0.0.11 added OperationLog (§3). All other schemas $ref defs here.",
+    "title": "Grand Vault v0.0.14 — lean SSoT (shared types only)",
+    "version": "0.0.14",
+    "description": "Lean SSoT of SHARED/universal types. v0.0.14 (PURELY ADDITIVE over v0.0.13): adds the §4b JWE encryption primitives (RFC 7516 / RFC 7518) — JWEFlattenedJSON, JWEProtectedHeaderDecoded, JWEKeyManagementAlgEnum, JWEContentEncryptionAlgEnum — the shared JOSE sibling of BlockSignature (JWS), for storing a whole (signed) a2-schema document encrypted; every v0.0.13 def is byte-identical. v0.0.13 (patch over v0.0.12) — GV-lean FIX: the §8 Contract PRIMITIVES (ContractParty/ContractClause/PartyAddress/PartyContact/PartyIdentifier/PartyRoleEnum/PartyTypeEnum/PartySignatureStateEnum/SignatoryBlock/ClauseTypeEnum/ConsentToESign/USESIGNCompliance/RedlineAction/RedlineActionEnum/SigningCeremonyEvidence/ContractSigningCeremony/HandwrittenContractSignature) were WRONGLY folded into GV; they are a contract DOMAIN concern and are now body-owned by the Contract PROFILE (mirrors the §10 compliance fix). GV keeps only shared types (A2Envelope, BlockSignature, SignatureBundle, HashChain, SigningCeremony, HandwrittenSignature, OperationLog, ConsentReceipt, ComplianceFrameworkEnum, the §3 AI-audit AIAction/Instruction/AuditSession, …). Composed (this GV + Contract profile) reproduces the full v0.0.12 def set (lossless). v0.0.12 carried A2Envelope.$signatures[] multi-party + per-signer `signer`; v0.0.11 added OperationLog (§3). All other schemas $ref defs here.",
     "license": "Apache-2.0",
     "x-a2-role": "ssot",
     "x-a2-deprecation-policy": "Defs marked x-a2-deprecated remain available for 2 minor versions before removal.",
@@ -474,7 +527,7 @@ missing = sorted(r for r in all_local_ref_names(gv8) if r not in nd)
 # Any absolute a2-schema URL ref inside GV is a bug (e.g. stale vault/v0.0.6 refs
 # carried in from the contract module). Flag them so they can never ship silently.
 abs_self_refs = sorted(set(re.findall(r'"\$ref":\s*"(https://a2-schema\.org/[^"]+)"', json.dumps(gv8))))
-print(f"GV v0.0.13 defs: {len(nd)}  (was {len(gd)})  | contract closure → Contract profile (NOT GV): {len(closure)}")
+print(f"GV v0.0.14 defs: {len(nd)}  (v0.0.13: {len(_V13)}, +{len(JWE_DEFS)} JWE)  | contract closure → Contract profile (NOT GV): {len(closure)}")
 print(f"dangling #/$defs refs in GV: {missing or 'NONE ✓'}")
 print(f"absolute a2-schema refs inside GV (must be 0): {abs_self_refs or 'NONE ✓'}")
 assert not abs_self_refs, f"GV contains absolute self-refs (should be local): {abs_self_refs}"
@@ -500,6 +553,21 @@ sig_profile = {
         "JAdESProfileEnum", "JAdESEtsiUEntry", "JAdESSigTst", "JAdESTstVD", "JAdESRVals", "JAdESXVals",
         "JCSCanonicalizationEnum", "JWSProtectedHeaderDecoded", "BlockSignature", "SignatureBundle",
         "HandwrittenSignature", "BiometricCapture", "BiometricTypeEnum"],
+}
+# Signature profile v0.0.4 = v0.0.3 + the §4b JWE encryption defs. Pinned to GV v0.0.14 as a whole
+# (the JWE defs do not exist in v0.0.10; the v0.0.3 shared defs are byte-identical in v0.0.14).
+_JWE_NAMES = [k for k in JWE_DEFS if not k.startswith("_____")]
+sig4_profile = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": SIG4_ID,
+    "title": "Signature Profile v0.0.4", "version": "0.0.4",
+    "description": "Profile selecting signature-related defs (JWS/JAdES, handwritten, biometric) and the JWE encryption defs (RFC 7516) from Grand Vault v0.0.14. NO own def bodies — pure $ref aggregator. v0.0.4 = v0.0.3 + JWEFlattenedJSON / JWEProtectedHeaderDecoded / JWEKeyManagementAlgEnum / JWEContentEncryptionAlgEnum.",
+    "license": "Apache-2.0", "x-a2-role": "profile", "x-a2-base-schema": GV_ID,
+    "$defs": {
+        "SignatureNode": {"oneOf": [
+            {"$ref": GV14REF + "BlockSignature"}, {"$ref": GV14REF + "HandwrittenSignature"},
+            {"$ref": GV14REF + "BiometricCapture"}, {"$ref": GV14REF + "SignatureBundle"}]},
+        "JWEFlattenedJSON": {"$ref": GV14REF + "JWEFlattenedJSON"}},
+    "x-a2-included-defs": sig_profile["x-a2-included-defs"] + _JWE_NAMES,
 }
 # Contract profile body-owning (GV-lean FIX): place the §8 contract defs in the PROFILE.
 # Contract defs reference EACH OTHER, so rewrite selectively: a #/$defs/X ref to another
@@ -589,6 +657,12 @@ def check_profile(p):
     bad += ["#/$defs/" + r for r in re.findall(r'"#/\$defs/([A-Za-z0-9_]+)"', json.dumps(p.get("$defs", {}))) if r not in own]
     return sorted(set(bad))
 print("signature-profile unresolved:", check_profile(sig_profile) or "NONE ✓")
+def check_profile_gv14(p):
+    bad = [r for r in re.findall(re.escape(GV14REF) + r'([A-Za-z0-9_]+)', json.dumps(p)) if r not in nd]
+    bad += [d for d in p.get("x-a2-included-defs", []) if d not in nd]
+    return sorted(set(bad))
+print("signature-profile v0.0.4 unresolved:", check_profile_gv14(sig4_profile) or "NONE ✓")
+assert not check_profile_gv14(sig4_profile)
 print("contract-profile  unresolved:", check_profile(ct_profile) or "NONE ✓")
 print("compliance-profile unresolved:", check_profile(comp_profile) or "NONE ✓")
 # law profile is HAND-WRITTEN (like delegation) — build.py never writes it, but it
@@ -628,7 +702,9 @@ def w(path, obj):
 # Public surface = Grand Vault + profiles ONLY (no tiers — see §6 above).
 # The `latest` copy is byte-identical (its internal $id still names the real version —
 # `latest` is a convenience mirror, never a distinct identity).
-for obj in (gv8, sig_profile, ct_profile, comp_profile):
+# Signature profile v0.0.3 is FROZEN (published; the Contract profile depends on it) — not rewritten;
+# v0.0.4 is the new `latest`.
+for obj in (gv8, sig4_profile, ct_profile, comp_profile):
     p = id_to_path(obj["$id"])
     w(p, obj)
     w(latest_path(p), obj)

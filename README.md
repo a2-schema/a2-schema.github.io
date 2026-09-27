@@ -95,13 +95,20 @@ Each published artifact is **immutable per version** and served at a URL whose p
 
 | Type | Schema | Version | Role |
 |---|---|---|---|
-| **SSoT** | [Grand Vault](vault/v0.0.13/schema.json) | v0.0.13 | **Lean** SSoT of shared/universal types (Common, HashChain, AI Audit, OperationLog, **Signature (multi-party `$signatures`)**, Biometric, SigningCeremony, ConsentReceipt, ComplianceFrameworkEnum). Domain defs live in profiles. |
-| Profile | [Signature](profiles/signature/v0.0.3/schema.json) | v0.0.3 | Signature use cases (ML-DSA, RSA, JAdES, Handwritten ISO 19794-7) — pure aggregator |
+| **SSoT** | [Grand Vault](vault/v0.0.14/schema.json) | v0.0.14 | **Lean** SSoT of shared/universal types (Common, HashChain, AI Audit, OperationLog, **Signature (multi-party `$signatures`)**, **Encryption (JWE, RFC 7516)**, Biometric, SigningCeremony, ConsentReceipt, ComplianceFrameworkEnum). Domain defs live in profiles. |
+| Profile | [Signature](profiles/signature/v0.0.4/schema.json) | v0.0.4 | Signature use cases (ML-DSA, RSA, JAdES, Handwritten ISO 19794-7) + JWE encryption (RFC 7516) — pure aggregator |
 | Profile | [Contract](profiles/contract/v0.1.11/schema.json) | v0.1.11 | Legal contracts (US ESIGN, JP 電子署名法, EU eIDAS) — **body-owning** (owns the FULL contract module §1–§14, 85 defs incl. Contract primitives moved out of GV; GV-lean) |
 | Profile | [Compliance](profiles/compliance/v0.0.2/schema.json) | v0.0.2 | Compliance (GDPR, EU AI Act, SOC 2, ISO 27001, …) — **body-owning** (owns §10 entity defs; GV-lean) |
 | Profile | [Delegation](profiles/delegation/v0.0.2/schema.json) | v0.0.2 | Power-of-attorney / delegation — **body-owning** |
 | Profile | [Law](profiles/law/v0.1.0/schema.json) | v0.1.0 | a2-law generation provenance (LLM/template/playbook/process versions, slot values, per-clause marks with statutory grounds) — **body-owning**, hand-written; references the Contract profile by id (two-layer) |
 
+> **v0.0.14 (purely additive over v0.0.13):** adds the §4b JWE encryption primitives (RFC 7516 / RFC 7518) —
+> `JWEFlattenedJSON`, `JWEProtectedHeaderDecoded`, `JWEKeyManagementAlgEnum` (RSA-OAEP-256 · ECDH-ES+A256KW ·
+> A256KW · dir), `JWEContentEncryptionAlgEnum` (A256GCM) — the shared JOSE sibling of `BlockSignature`, for storing
+> a whole (signed) a2-schema document encrypted (one random content key per encryption, wrapped by the
+> key-encryption key named in `kid`). Every v0.0.13 def is byte-identical. **Signature profile v0.0.4** = v0.0.3 +
+> these JWE defs (v0.0.3 stays frozen; the Contract profile v0.1.11 still depends on it).
+>
 > **v0.0.13 (GV-lean fix over v0.0.12):** §8 Contract primitives moved OUT of GV into the body-owning
 > Contract profile; composed (GV v0.0.13 + Contract profile) reproduces the v0.0.12 def set
 > byte-for-byte (gate: `tools/composed_lossless_test.py`). **Contract v0.1.11** restores the FULL
